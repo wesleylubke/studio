@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -25,7 +24,7 @@ import {
   Loader2,
   UserPlus
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { 
