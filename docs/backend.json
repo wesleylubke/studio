@@ -1,0 +1,228 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the GanttFlow application. This entity stores basic user information linked to an external authentication system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, typically provided by an external authentication system.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred name for display within the application."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "displayName"
+      ]
+    },
+    "Project": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Project",
+      "type": "object",
+      "description": "Represents a major initiative or body of work that can be managed and visualized in the GanttFlow application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Project entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the project."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the project, providing context and scope, useful for the AI Task Assistant Tool."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The planned start date for the project.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The planned end date for the project.",
+          "format": "date-time"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Reference to the User who created or owns this project. (Relationship: User 1:N Project)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the project was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the project was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "startDate",
+        "endDate",
+        "ownerId"
+      ]
+    },
+    "Task": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Task",
+      "type": "object",
+      "description": "Represents an individual task within a project, including its schedule, progress, and dependencies.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Task entity."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Reference to the Project this task belongs to. (Relationship: Project 1:N Task)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name or title of the task."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the task."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The planned start date for the task.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The planned end date for the task.",
+          "format": "date-time"
+        },
+        "progressPercentage": {
+          "type": "number",
+          "description": "The current completion percentage of the task (0-100)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the task.",
+          "format": "enum",
+          "items": {
+            "type": "string"
+          }
+        },
+        "predecessorTaskIds": {
+          "type": "array",
+          "description": "An array of task IDs that must be completed before this task can start. (Relationship: Task N:N Task - self-referencing)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the task was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the task was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "name",
+        "startDate",
+        "endDate",
+        "progressPercentage",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores individual user profiles. Access is restricted to the user whose ID matches the document path. The '{userId}' parameter corresponds to the authenticated user's UID."
+        }
+      },
+      {
+        "path": "/users/{userId}/projects/{projectId}",
+        "definition": {
+          "entityName": "Project",
+          "schema": {
+            "$ref": "#/backend/entities/Project"
+          },
+          "description": "Contains projects created and owned by a specific user. Authorization is achieved through the hierarchical path: only the authenticated user matching '{userId}' can access their projects. This structure ensures Authorization Independence and supports QAPs for listing a user's projects.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this project."
+            },
+            {
+              "name": "projectId",
+              "description": "The unique identifier for the project."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/projects/{projectId}/tasks/{taskId}",
+        "definition": {
+          "entityName": "Task",
+          "schema": {
+            "$ref": "#/backend/entities/Task"
+          },
+          "description": "Stores tasks belonging to a specific project. Authorization is inherited from the parent project's path: only the authenticated user matching '{userId}' (the project owner) can access tasks within their projects. This structure ensures Authorization Independence for tasks, avoiding 'get()' calls to parent documents in security rules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the parent project."
+            },
+            {
+              "name": "projectId",
+              "description": "The unique identifier for the parent project."
+            },
+            {
+              "name": "taskId",
+              "description": "The unique identifier for the task."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for GanttFlow prioritizes security, scalability, and debuggability by strictly adhering to path-based authorization and structural segregation. This approach ensures robust security rules and efficient queries, directly addressing the principles of Authorization Independence, Clarity of Intent, DBAC, QAPs, and Invariants.\n\n1.  **User Profiles (`/users/{userId}`):** User profiles are stored in a top-level collection `users`. Each user's document ID (`{userId}`) is directly tied to their Firebase Authentication UID. This immediately establishes ownership and privacy for user-specific data, as access rules can simply check `request.auth.uid == userId`.\n\n2.  **Projects (`/users/{userId}/projects/{projectId}`):** Projects are organized as a subcollection under the owning user's profile. This hierarchical path (`/users/{userId}/projects/{projectId}`) is fundamental to achieving **Authorization Independence** and supporting **QAPs**.\n    *   **Authorization Independence:** By nesting projects under `/users/{userId}`, access to a project is inherently tied to the authenticated user. Security rules for `projects/{projectId}` can directly verify `request.auth.uid == userId` (where `userId` is the path parameter) without needing to perform a `get()` operation on a parent user document or relying on an `ownerId` field *within* the project document itself for primary authorization. This avoids the pitfalls of hierarchical authorization dependencies, enabling atomic operations and simplifying rule debugging.\n    *   **QAPs:** This structure enables efficient and secure listing of projects. A user can fetch all their projects by querying `db.collection('users').doc(request.auth.uid).collection('projects')`. The rules will automatically enforce that only projects under the authenticated user's path can be read.\n\n3.  **Tasks (`/users/{userId}/projects/{projectId}/tasks/{taskId}`):** Tasks are further nested as a subcollection under their respective projects. This continues the hierarchical authorization model.\n    *   **Authorization Independence:** Similar to projects, task authorization is derived directly from its path. For a task at `/users/{userId}/projects/{projectId}/tasks/{taskId}`, the security rule `request.auth.uid == userId` (where `userId` is the path parameter representing the project owner) grants access without requiring any `get()` calls to the parent project's data. This design ensures that task access is atomic and independent of the parent document's *content* for authorization.\n    *   The `Task` document includes `projectId` as per the schema, which is useful for cross-referencing or specific queries, but its primary authorization relies on the hierarchical path.\n    *   **QAPs:** Listing tasks for a given project is straightforward and secure: `db.collection('users').doc(request.auth.uid).collection('projects').doc(projectId).collection('tasks')`.\n\nThis structure provides a clear and predictable model where access control is primarily determined by the document's path, making Firestore security rules concise, easy to understand, and highly performant. The use of descriptive wildcards (`userId`, `projectId`, `taskId`) further enhances clarity and debuggability."
+  }
+}
