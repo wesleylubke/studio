@@ -141,7 +141,12 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onTaskEdit?.(task)}>
+                    <DropdownMenuItem 
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        onTaskEdit?.(task);
+                      }}
+                    >
                       <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Edit Task
                     </DropdownMenuItem>

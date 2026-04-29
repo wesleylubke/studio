@@ -51,8 +51,8 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const handleSubmit = () => {
     if (!name.trim()) return;
     
-    // Use null instead of undefined for Firestore compatibility
-    const finalAssignee = assigneeEmail === 'unassigned' ? null : assigneeEmail;
+    // Explicitly handle unassigned to avoid undefined in Firestore
+    const finalAssignee = (assigneeEmail === 'unassigned' || !assigneeEmail) ? null : assigneeEmail;
 
     onSubmit({ 
       name, 
@@ -66,7 +66,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-xl font-headline font-bold">
             {initialTask ? 'Edit Task' : 'Add New Task'}

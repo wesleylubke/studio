@@ -84,15 +84,13 @@ export default function ProjectPage() {
     } else {
       addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
     }
-    
-    // Cleanup editing state
-    setEditingTask(null);
   };
 
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
-      setEditingTask(null);
+      // Small delay to ensure Radix unmounts cleanly before state resets
+      setTimeout(() => setEditingTask(null), 100);
     }
   };
 
@@ -367,7 +365,12 @@ export default function ProjectPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditTaskClick(task)}>
+                              <DropdownMenuItem 
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  handleEditTaskClick(task);
+                                }}
+                              >
                                 Edit Task
                               </DropdownMenuItem>
                               <DropdownMenuItem 
