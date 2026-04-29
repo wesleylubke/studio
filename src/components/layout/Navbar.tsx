@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, GanttChart, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, GanttChart, LogIn, LogOut, User as UserIcon, Loader2 } from 'lucide-react';
 import { useAuth, useUser, initiateGoogleSignIn } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -12,8 +13,10 @@ export default function Navbar() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleLogin = async () => {
+    setIsLoggingIn(true);
     try {
       await initiateGoogleSignIn(auth);
     } catch (error: any) {
@@ -25,13 +28,15 @@ export default function Navbar() {
           description: "Google Sign-In is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.",
           variant: "destructive"
         });
-      } else {
+      } else if (error.code !== 'auth/popup-closed-by-user') {
         toast({
           title: "Login Failed",
           description: error.message || "An unexpected error occurred. Please try again.",
           variant: "destructive"
         });
       }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -56,7 +61,9 @@ export default function Navbar() {
           </Link>
         )}
 
-        {!isUserLoading && (
+        {isUserLoading ? (
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        ) : (
           user ? (
             <div className="flex items-center gap-4">
               <div className="flex flex-col items-end mr-2 hidden sm:flex">
@@ -75,8 +82,12 @@ export default function Navbar() {
               </Button>
             </div>
           ) : (
-            <Button size="sm" onClick={handleLogin}>
-              <LogIn className="w-4 h-4 mr-2" />
+            <Button size="sm" onClick={handleLogin} disabled={isLoggingIn}>
+              {isLoggingIn ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <LogIn className="w-4 h-4 mr-2" />
+              )}
               Sign In
             </Button>
           )

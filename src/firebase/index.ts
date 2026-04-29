@@ -6,19 +6,12 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 export function initializeFirebase() {
-  if (!getApps().length) {
-    let firebaseApp;
-    try {
-      firebaseApp = initializeApp();
-    } catch (e) {
-      if (process.env.NODE_ENV === "production") {
-        console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
-      }
-      firebaseApp = initializeApp(firebaseConfig);
-    }
-    return getSdks(firebaseApp);
-  }
-  return getSdks(getApp());
+  // Ensure we only initialize once and always use the provided config
+  const app = getApps().length === 0 
+    ? initializeApp(firebaseConfig) 
+    : getApp();
+    
+  return getSdks(app);
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {

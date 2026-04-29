@@ -7,7 +7,6 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from 'firebase/auth';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 /** Initiate anonymous sign-in (non-blocking). */
 export function initiateAnonymousSignIn(authInstance: Auth): void {
@@ -27,8 +26,11 @@ export function initiateEmailSignIn(authInstance: Auth, email: string, password:
 /** Initiate Google sign-in (non-blocking). */
 export function initiateGoogleSignIn(authInstance: Auth): Promise<void> {
   const provider = new GoogleAuthProvider();
-  // We return the promise here because popups require immediate user interaction feedback,
-  // but the caller should generally handle the result via the onAuthStateChanged listener in the provider.
+  // Force account selection to help with stuck sessions and clarity
+  provider.setCustomParameters({
+    prompt: 'select_account'
+  });
+  
   return signInWithPopup(authInstance, provider)
     .then(() => {
       // Success is handled by the provider's onAuthStateChanged listener
@@ -37,7 +39,7 @@ export function initiateGoogleSignIn(authInstance: Auth): Promise<void> {
       if (error.code === 'auth/popup-closed-by-user') {
         return;
       }
-      // Re-throw or handle specific errors like 'auth/operation-not-allowed'
+      // Re-throw to be handled by the UI
       throw error;
     });
 }
