@@ -66,7 +66,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-headline font-bold">
             {initialTask ? 'Edit Task' : 'Add New Task'}

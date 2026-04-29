@@ -120,7 +120,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
 
       <div className="flex-grow overflow-auto custom-scrollbar">
         <div className="flex min-h-full">
-          {/* Sidebar Task List */}
           <div className="w-24 sm:w-64 flex-shrink-0 border-r divide-y bg-card/50">
             {chartData.map(task => (
               <div 
@@ -142,9 +141,9 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem 
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        onTaskEdit?.(task);
+                      onSelect={() => {
+                        // Delay to allow dropdown to close and restore body interaction
+                        setTimeout(() => onTaskEdit?.(task), 100);
                       }}
                     >
                       <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
@@ -168,7 +167,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
             )}
           </div>
 
-          {/* Timeline View */}
           <div 
             className="flex-grow gantt-grid relative min-h-full" 
             style={{ width: dateRange.length * DAY_WIDTH }}
@@ -186,15 +184,12 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                           background: 'hsl(var(--muted))'
                         }}
                       >
-                        {/* Progress Bar Background */}
                         <div 
                           className="h-full bg-primary"
                           style={{ width: `${task.progress}%` }}
                         />
-                        {/* Accent highlight */}
                         <div className="absolute inset-0 border border-primary/20 rounded-full" />
                         
-                        {/* Task info inside if wide enough */}
                         {task.duration > 60 && (
                           <div className="absolute inset-0 flex items-center px-2 pointer-events-none">
                             <span className="text-[8px] sm:text-[9px] font-bold text-white truncate drop-shadow-sm">
@@ -231,7 +226,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
               </div>
             ))}
             
-            {/* Today Line */}
             {dateRange.map((date, idx) => {
                const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
                if (!isToday) return null;

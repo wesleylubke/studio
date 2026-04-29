@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
@@ -89,7 +89,6 @@ export default function ProjectPage() {
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
-      // Small delay to ensure Radix unmounts cleanly before state resets
       setTimeout(() => setEditingTask(null), 100);
     }
   };
@@ -366,9 +365,8 @@ export default function ProjectPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem 
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  handleEditTaskClick(task);
+                                onSelect={() => {
+                                  setTimeout(() => handleEditTaskClick(task), 100);
                                 }}
                               >
                                 Edit Task
