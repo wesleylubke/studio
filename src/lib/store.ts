@@ -37,6 +37,12 @@ export function useProjectStore() {
     return newProject;
   };
 
+  const updateProject = (id: string, updates: Partial<Project>) => {
+    const updated = projects.map(p => (p.id === id ? { ...p, ...updates } : p));
+    setProjects(updated);
+    saveToStorage(updated, tasks);
+  };
+
   const deleteProject = (id: string) => {
     const updatedProjects = projects.filter(p => p.id !== id);
     const updatedTasks = tasks.filter(t => t.projectId !== id);
@@ -73,6 +79,7 @@ export function useProjectStore() {
     tasks,
     isLoaded,
     addProject,
+    updateProject,
     deleteProject,
     addTask,
     updateTask,

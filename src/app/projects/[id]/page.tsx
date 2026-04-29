@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -6,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
 import TaskDialog from '@/components/tasks/TaskDialog';
+import ProjectDialog from '@/components/projects/ProjectDialog';
 import { useProjectStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,8 @@ import {
   GanttChart as GanttIcon,
   CheckCircle2,
   Clock,
-  MoreVertical
+  MoreVertical,
+  Edit2
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
@@ -34,8 +35,9 @@ import {
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { projects, tasks, isLoaded, addTask, updateTask, deleteTask, deleteProject } = useProjectStore();
+  const { projects, tasks, isLoaded, addTask, updateTask, deleteTask, deleteProject, updateProject } = useProjectStore();
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
 
   const project = useMemo(() => projects.find(p => p.id === id), [projects, id]);
@@ -67,7 +69,14 @@ export default function ProjectPage() {
     setEditingTask(null);
   };
 
-  const handleEditClick = (task: any) => {
+  const handleProjectSubmit = (projectData: any) => {
+    updateProject(project.id, {
+      name: projectData.name,
+      description: projectData.description
+    });
+  };
+
+  const handleEditTaskClick = (task: any) => {
     setEditingTask(task);
     setIsTaskDialogOpen(true);
   };
@@ -110,6 +119,13 @@ export default function ProjectPage() {
           </div>
           
           <div className="flex items-center gap-3">
+             <Button 
+              variant="outline" 
+              onClick={() => setIsProjectDialogOpen(true)}
+             >
+               <Edit2 className="w-4 h-4 mr-2" />
+               Edit Project
+             </Button>
              <Button 
               variant="outline" 
               className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
@@ -189,7 +205,7 @@ export default function ProjectPage() {
                 <GanttChart 
                   tasks={projectTasks} 
                   onTaskUpdate={updateTask} 
-                  onTaskEdit={handleEditClick}
+                  onTaskEdit={handleEditTaskClick}
                   onTaskDelete={deleteTask}
                 />
               </div>
@@ -252,7 +268,7 @@ export default function ProjectPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditClick(task)}>
+                              <DropdownMenuItem onClick={() => handleEditTaskClick(task)}>
                                 Edit Task
                               </DropdownMenuItem>
                               <DropdownMenuItem 
@@ -286,6 +302,13 @@ export default function ProjectPage() {
         onOpenChange={setIsTaskDialogOpen} 
         onSubmit={handleTaskSubmit}
         initialTask={editingTask}
+      />
+
+      <ProjectDialog
+        open={isProjectDialogOpen}
+        onOpenChange={setIsProjectDialogOpen}
+        onSubmit={handleProjectSubmit}
+        initialProject={project}
       />
     </div>
   );
