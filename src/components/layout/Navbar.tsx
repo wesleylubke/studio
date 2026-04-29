@@ -1,10 +1,9 @@
-
-"use client";
+'use client';
 
 import Link from 'next/link';
 import { LayoutDashboard, GanttChart, LogIn, LogOut, User as UserIcon } from 'lucide-react';
-import { useAuth, useUser } from '@/firebase';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { useAuth, useUser, initiateGoogleSignIn } from '@/firebase';
+import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
@@ -15,21 +14,15 @@ export default function Navbar() {
   const { toast } = useToast();
 
   const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      await initiateGoogleSignIn(auth);
     } catch (error: any) {
-      // Gracefully handle when the user closes the popup without signing in
-      if (error.code === 'auth/popup-closed-by-user') {
-        return;
-      }
-
-      console.error("Firebase Auth Error:", error);
+      console.error("Login Error:", error);
       
       if (error.code === 'auth/operation-not-allowed') {
         toast({
           title: "Sign-in Provider Disabled",
-          description: "Google Sign-In must be enabled in the Firebase Console. Go to Authentication > Sign-in method and enable the Google provider.",
+          description: "Google Sign-In is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.",
           variant: "destructive"
         });
       } else {
