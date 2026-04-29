@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -71,6 +72,60 @@ export default function ProjectPage() {
     return { avgProgress, completed };
   }, [projectTasks]);
 
+  const handleTaskSubmit = (taskData: any) => {
+    if (!db) return;
+    if (editingTask) {
+      updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', editingTask.id), taskData);
+    } else {
+      addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
+    }
+    setEditingTask(null);
+    setIsTaskDialogOpen(false);
+  };
+
+  const handleTaskDialogChange = (open: boolean) => {
+    setIsTaskDialogOpen(open);
+    if (!open) {
+      setEditingTask(null);
+    }
+  };
+
+  const handleProjectSubmit = (projectData: any) => {
+    if (!db) return;
+    updateDocumentNonBlocking(doc(db, 'projects', project.id), {
+      name: projectData.name,
+      description: projectData.description
+    });
+    setIsProjectDialogOpen(false);
+  };
+
+  const handleShareSubmit = () => {
+    if (!db || !shareEmail) return;
+    updateDocumentNonBlocking(doc(db, 'projects', id), {
+      members: arrayUnion(shareEmail.trim())
+    });
+    setShareEmail('');
+    setIsShareDialogOpen(false);
+  };
+
+  const handleEditTaskClick = (task: any) => {
+    setEditingTask(task);
+    setIsTaskDialogOpen(true);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    if (!db) return;
+    deleteDocumentNonBlocking(doc(db, 'projects', id, 'tasks', taskId));
+  };
+
+  const handleDeleteProject = () => {
+    if (!db || !project) return;
+    if (confirm('Are you sure you want to delete this project and all its tasks?')) {
+      deleteDocumentNonBlocking(doc(db, 'projects', project.id));
+      router.push('/');
+    }
+  };
+
   if (isUserLoading || (user && (isProjectLoading || isTasksLoading))) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -109,51 +164,6 @@ export default function ProjectPage() {
       </div>
     );
   }
-
-  const handleTaskSubmit = (taskData: any) => {
-    if (!db) return;
-    if (editingTask) {
-      updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', editingTask.id), taskData);
-    } else {
-      addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
-    }
-    setEditingTask(null);
-  };
-
-  const handleProjectSubmit = (projectData: any) => {
-    if (!db) return;
-    updateDocumentNonBlocking(doc(db, 'projects', project.id), {
-      name: projectData.name,
-      description: projectData.description
-    });
-  };
-
-  const handleShareSubmit = () => {
-    if (!db || !shareEmail) return;
-    updateDocumentNonBlocking(doc(db, 'projects', id), {
-      members: arrayUnion(shareEmail.trim())
-    });
-    setShareEmail('');
-    setIsShareDialogOpen(false);
-  };
-
-  const handleEditTaskClick = (task: any) => {
-    setEditingTask(task);
-    setIsTaskDialogOpen(true);
-  };
-
-  const handleDeleteTask = (taskId: string) => {
-    if (!db) return;
-    deleteDocumentNonBlocking(doc(db, 'projects', id, 'tasks', taskId));
-  };
-
-  const handleDeleteProject = () => {
-    if (!db) return;
-    if (confirm('Are you sure you want to delete this project and all its tasks?')) {
-      deleteDocumentNonBlocking(doc(db, 'projects', project.id));
-      router.push('/');
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -364,7 +374,7 @@ export default function ProjectPage() {
 
       <TaskDialog 
         open={isTaskDialogOpen} 
-        onOpenChange={setIsTaskDialogOpen} 
+        onOpenChange={handleTaskDialogChange} 
         onSubmit={handleTaskSubmit}
         initialTask={editingTask}
       />
