@@ -1,29 +1,54 @@
+
 "use client";
 
 import { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectDialog from '@/components/projects/ProjectDialog';
-import { useProjectStore } from '@/lib/store';
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, Sparkles } from 'lucide-react';
+import { Plus, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
 
 export default function Home() {
-  const { projects, tasks, isLoaded, addProject, deleteProject, addTask } = useProjectStore();
+  const { user, isUserLoading } = useUser();
+  const db = useFirestore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const projectsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'projects');
+  }, [db, user]);
+
+  const { data: projects, isLoading: isProjectsLoading } = useCollection(projectsQuery);
+
   const handleCreateProject = async ({ name, description, tasks: aiTasks }: { name: string; description: string; tasks?: any[] }) => {
-    const project = addProject({ name, description });
-    
-    if (aiTasks && aiTasks.length > 0) {
+    if (!user || !db) return;
+
+    const projectsRef = collection(db, 'projects');
+    const projectData = {
+      name,
+      description,
+      ownerId: user.uid,
+      ownerEmail: user.email,
+      members: [user.email],
+      createdAt: new Date().toISOString()
+    };
+
+    const projectRefPromise = addDocumentNonBlocking(projectsRef, projectData);
+    const projectRef = await projectRefPromise;
+
+    if (aiTasks && aiTasks.length > 0 && projectRef) {
+      const tasksRef = collection(db, 'projects', projectRef.id, 'tasks');
       let currentStartDate = new Date();
       aiTasks.forEach((task, index) => {
         const start = addDays(currentStartDate, index * 2);
         const end = addDays(start, 3);
         
-        addTask({
-          projectId: project.id,
+        addDocumentNonBlocking(tasksRef, {
+          projectId: projectRef.id,
           name: task.name,
           description: task.description,
           startDate: format(start, 'yyyy-MM-dd'),
@@ -34,7 +59,42 @@ export default function Home() {
     }
   };
 
-  if (!isLoaded) return null;
+  const handleDeleteProject = (projectId: string) => {
+    if (!db) return;
+    deleteDocumentNonBlocking(doc(db, 'projects', projectId));
+  };
+
+  if (isUserLoading || (user && isProjectsLoading)) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-6">
+          <h1 className="text-5xl font-extrabold tracking-tight max-w-2xl">
+            Master your project timelines with <span className="text-primary">GanttFlow</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-xl">
+            The easiest way to visualize progress and collaborate with your team in real-time.
+          </p>
+          <div className="bg-card p-12 rounded-3xl border shadow-2xl border-primary/20">
+            <Sparkles className="w-12 h-12 text-primary mx-auto mb-6" />
+            <h3 className="text-2xl font-bold mb-4">Ready to start?</h3>
+            <p className="text-muted-foreground mb-8">Sign in with your Google account to create your first portfolio.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,14 +119,13 @@ export default function Home() {
           </Button>
         </div>
 
-        {projects.length > 0 ? (
+        {projects && projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map(project => (
               <ProjectCard 
                 key={project.id} 
                 project={project} 
-                taskCount={tasks.filter(t => t.projectId === project.id).length}
-                onDelete={deleteProject}
+                onDelete={handleDeleteProject}
               />
             ))}
           </div>

@@ -1,108 +1,29 @@
-/**
- * GanttFlow Firestore Security Rules
- *
- * CORE PHILOSOPHY
- * This ruleset enforces a strict user-ownership model using path-based authorization. 
- * Access to any data is predicated on the authenticated user's ID matching the 
- * root {userId} segment of the document path.
- *
- * DATA STRUCTURE
- * The database follows a strictly hierarchical structure:
- * /users/{userId}
- *   └── /projects/{projectId}
- *       └── /tasks/{taskId}
- *
- * KEY SECURITY DECISIONS
- * 1. Authorization Independence: By nesting projects and tasks under a specific 
- *    user's path, security rules can verify access by comparing the path 
- *    parameter to the authenticated UID without expensive get() lookups.
- * 2. Strict Ownership: Users can only read or write data within their own 
- *    hierarchy. There is no concept of public sharing or administrative 
- *    overrides in this current iteration.
- * 3. Relational Integrity: On creation and update, the rules enforce that internal 
- *    relational fields (like ownerId or projectId) remain consistent with the 
- *    authorized path to prevent data from being "orphaned" or moved across users.
- * 4. Prototyping Flexibility: While authorization is strictly enforced, 
- *    schema validation for non-relational fields (e.g., descriptions, dates) is 
- *    omitted to allow for rapid development and data model iteration.
- *
- * DENORMALIZATION FOR AUTHORIZATION
- * The architecture uses structural denormalization. The {userId} in the path 
- * acts as the primary authorization token. The rules require that documents 
- * within these paths maintain corresponding internal IDs (ownerId/projectId) 
- * to ensure that client-side queries remain performant and secure.
- */
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // --- Helper Functions ---
-
-    /**
-     * @description Checks if the request is from an authenticated user.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * @description Checks if the authenticated user's UID matches the provided userId.
-     */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    function isProjectMember(projectId) {
+      let project = get(/databases/$(database)/documents/projects/$(projectId)).data;
+      return request.auth.token.email in project.members || request.auth.uid == project.ownerId;
     }
 
-    /**
-     * @description Combines ownership check with a verification that the document exists.
-     * Used for update and delete operations.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    // --- Collection Rules ---
-
-    /**
-     * @description Security rules for the User profile documents.
-     * @path /users/{userId}
-     * @allow (get) If the authenticated user's UID matches the {userId} path.
-     * @deny (list) Even for the owner, to prevent accidental bulk user fetching.
-     * @principle Restricts access to a user's own profile and forces self-creation.
-     */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false; // Users should fetch their own profile by ID, not list
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow get, write: if request.auth.uid == userId;
+    }
 
-      /**
-       * @description Security rules for Projects owned by a specific user.
-       * @path /users/{userId}/projects/{projectId}
-       * @allow (create) If the user owns the path and sets the internal ownerId correctly.
-       * @deny (update) If the user attempts to change the ownerId field.
-       * @principle Path-based authorization ensures high performance and data isolation.
-       */
-      match /projects/{projectId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.ownerId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.ownerId == resource.data.ownerId;
-        allow delete: if isExistingOwner(userId);
+    match /projects/{projectId} {
+      allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.token.email in resource.data.members);
+      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.token.email in resource.data.members);
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.token.email in resource.data.members);
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 
-        /**
-         * @description Security rules for Tasks belonging to a specific project.
-         * @path /users/{userId}/projects/{projectId}/tasks/{taskId}
-         * @allow (list) If the authenticated user matches the userId at the root of the path.
-         * @deny (create) If the projectId in the data does not match the project ID in the path.
-         * @principle Authorization Independence: Tasks are secured by the parent user's ID in the path.
-         */
-        match /tasks/{taskId} {
-          allow get, list: if isOwner(userId);
-          allow create: if isOwner(userId) && request.resource.data.projectId == projectId;
-          allow update: if isExistingOwner(userId) && request.resource.data.projectId == resource.data.projectId;
-          allow delete: if isExistingOwner(userId);
-        }
+      match /tasks/{taskId} {
+        allow read, write: if isSignedIn() && isProjectMember(projectId);
       }
     }
   }

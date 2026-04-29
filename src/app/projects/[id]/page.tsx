@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -6,7 +7,6 @@ import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
 import TaskDialog from '@/components/tasks/TaskDialog';
 import ProjectDialog from '@/components/projects/ProjectDialog';
-import { useProjectStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,9 +20,12 @@ import {
   CheckCircle2,
   Clock,
   MoreVertical,
-  Edit2
+  Edit2,
+  Share2,
+  Loader2,
+  UserPlus
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -31,49 +34,83 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc, arrayUnion } from 'firebase/firestore';
+import { updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { projects, tasks, isLoaded, addTask, updateTask, deleteTask, deleteProject, updateProject } = useProjectStore();
+  const { user } = useUser();
+  const db = useFirestore();
+
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
+  const [shareEmail, setShareEmail] = useState('');
 
-  const project = useMemo(() => projects.find(p => p.id === id), [projects, id]);
-  const projectTasks = useMemo(() => tasks.filter(t => t.projectId === id), [tasks, id]);
+  const projectRef = useMemoFirebase(() => db ? doc(db, 'projects', id) : null, [db, id]);
+  const { data: project, isLoading: isProjectLoading } = useDoc(projectRef);
+
+  const tasksQuery = useMemoFirebase(() => db ? collection(db, 'projects', id, 'tasks') : null, [db, id]);
+  const { data: projectTasks, isLoading: isTasksLoading } = useCollection(tasksQuery);
 
   const stats = useMemo(() => {
-    if (projectTasks.length === 0) return { avgProgress: 0, completed: 0 };
+    if (!projectTasks || projectTasks.length === 0) return { avgProgress: 0, completed: 0 };
     const completed = projectTasks.filter(t => t.progress === 100).length;
-    const avgProgress = Math.round(projectTasks.reduce((acc, t) => acc + t.progress, 0) / projectTasks.length);
+    const avgProgress = Math.round(projectTasks.reduce((acc, t) => acc + (t.progress || 0), 0) / projectTasks.length);
     return { avgProgress, completed };
   }, [projectTasks]);
 
-  if (!isLoaded) return null;
+  if (isProjectLoading || isTasksLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Project not found</h2>
+        <h2 className="text-2xl font-bold mb-4">Project not found or Access Denied</h2>
         <Button onClick={() => router.push('/')}>Return to Dashboard</Button>
       </div>
     );
   }
 
   const handleTaskSubmit = (taskData: any) => {
+    if (!db) return;
     if (editingTask) {
-      updateTask(editingTask.id, taskData);
+      updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', editingTask.id), taskData);
     } else {
-      addTask({ ...taskData, projectId: id });
+      addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
     }
     setEditingTask(null);
   };
 
   const handleProjectSubmit = (projectData: any) => {
-    updateProject(project.id, {
+    if (!db) return;
+    updateDocumentNonBlocking(doc(db, 'projects', project.id), {
       name: projectData.name,
       description: projectData.description
     });
+  };
+
+  const handleShareSubmit = () => {
+    if (!db || !shareEmail) return;
+    updateDocumentNonBlocking(doc(db, 'projects', id), {
+      members: arrayUnion(shareEmail.trim())
+    });
+    setShareEmail('');
+    setIsShareDialogOpen(false);
   };
 
   const handleEditTaskClick = (task: any) => {
@@ -81,9 +118,15 @@ export default function ProjectPage() {
     setIsTaskDialogOpen(true);
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    if (!db) return;
+    deleteDocumentNonBlocking(doc(db, 'projects', id, 'tasks', taskId));
+  };
+
   const handleDeleteProject = () => {
+    if (!db) return;
     if (confirm('Are you sure you want to delete this project and all its tasks?')) {
-      deleteProject(project.id);
+      deleteDocumentNonBlocking(doc(db, 'projects', project.id));
       router.push('/');
     }
   };
@@ -93,7 +136,6 @@ export default function ProjectPage() {
       <Navbar />
       
       <main className="flex-grow p-6 flex flex-col space-y-6">
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
@@ -119,21 +161,24 @@ export default function ProjectPage() {
           </div>
           
           <div className="flex items-center gap-3">
-             <Button 
-              variant="outline" 
-              onClick={() => setIsProjectDialogOpen(true)}
-             >
+             <Button variant="outline" onClick={() => setIsShareDialogOpen(true)}>
+               <Share2 className="w-4 h-4 mr-2" />
+               Share
+             </Button>
+             <Button variant="outline" onClick={() => setIsProjectDialogOpen(true)}>
                <Edit2 className="w-4 h-4 mr-2" />
-               Edit Project
+               Edit
              </Button>
-             <Button 
-              variant="outline" 
-              className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
-              onClick={handleDeleteProject}
-             >
-               <Trash2 className="w-4 h-4 mr-2" />
-               Delete Project
-             </Button>
+             {user?.uid === project.ownerId && (
+               <Button 
+                variant="outline" 
+                className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
+                onClick={handleDeleteProject}
+               >
+                 <Trash2 className="w-4 h-4 mr-2" />
+                 Delete
+               </Button>
+             )}
              <Button className="bg-primary hover:bg-primary/90 shadow-lg" onClick={() => {
                setEditingTask(null);
                setIsTaskDialogOpen(true);
@@ -144,7 +189,6 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
             <div className="bg-primary/10 p-3 rounded-lg">
@@ -152,7 +196,7 @@ export default function ProjectPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Tasks</p>
-              <p className="text-xl font-bold">{projectTasks.length}</p>
+              <p className="text-xl font-bold">{projectTasks?.length || 0}</p>
             </div>
           </div>
           <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
@@ -170,7 +214,7 @@ export default function ProjectPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">In Progress</p>
-              <p className="text-xl font-bold">{projectTasks.length - stats.completed}</p>
+              <p className="text-xl font-bold">{(projectTasks?.length || 0) - stats.completed}</p>
             </div>
           </div>
           <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
@@ -184,7 +228,6 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Main Content Area */}
         <div className="flex-grow flex flex-col">
           <Tabs defaultValue="gantt" className="w-full flex-grow flex flex-col">
             <div className="flex items-center justify-between border-b pb-2 mb-4">
@@ -203,10 +246,9 @@ export default function ProjectPage() {
             <TabsContent value="gantt" className="flex-grow m-0 focus-visible:ring-0">
               <div className="h-[600px]">
                 <GanttChart 
-                  tasks={projectTasks} 
-                  onTaskUpdate={updateTask} 
+                  tasks={projectTasks || []} 
                   onTaskEdit={handleEditTaskClick}
-                  onTaskDelete={deleteTask}
+                  onTaskDelete={handleDeleteTask}
                 />
               </div>
             </TabsContent>
@@ -224,7 +266,7 @@ export default function ProjectPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {projectTasks.map(task => (
+                    {projectTasks?.map(task => (
                       <tr key={task.id} className="hover:bg-muted/10 transition-colors group">
                         <td className="px-6 py-4">
                           <p className="font-semibold text-sm">{task.name}</p>
@@ -233,7 +275,6 @@ export default function ProjectPage() {
                         <td className="px-6 py-4">
                           <div className="text-xs">
                             <p className="font-medium">{format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}</p>
-                            <p className="text-muted-foreground">2024</p>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -273,7 +314,7 @@ export default function ProjectPage() {
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-destructive" 
-                                onClick={() => deleteTask(task.id)}
+                                onClick={() => handleDeleteTask(task.id)}
                               >
                                 Delete Task
                               </DropdownMenuItem>
@@ -282,7 +323,7 @@ export default function ProjectPage() {
                         </td>
                       </tr>
                     ))}
-                    {projectTasks.length === 0 && (
+                    {(!projectTasks || projectTasks.length === 0) && (
                       <tr>
                         <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                           No tasks created for this project yet.
@@ -308,8 +349,48 @@ export default function ProjectPage() {
         open={isProjectDialogOpen}
         onOpenChange={setIsProjectDialogOpen}
         onSubmit={handleProjectSubmit}
-        initialProject={project}
+        initialProject={project as any}
       />
+
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              Share Project
+            </DialogTitle>
+            <DialogDescription>
+              Invite other users to collaborate on this project by entering their email address.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input 
+                id="email" 
+                placeholder="colleague@example.com" 
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Current Members</Label>
+              <div className="space-y-1">
+                {project.members.map((member: string) => (
+                  <div key={member} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border text-sm">
+                    <span>{member}</span>
+                    {member === project.ownerEmail && <Badge variant="outline" className="text-[8px] h-4">OWNER</Badge>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleShareSubmit} disabled={!shareEmail}>Invite</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

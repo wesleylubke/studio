@@ -1,17 +1,18 @@
-import { Project } from '@/types';
+
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Trash2, ArrowRight } from 'lucide-react';
+import { Calendar, Trash2, ArrowRight, Share2, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
 interface ProjectCardProps {
-  project: Project;
-  taskCount: number;
+  project: any;
   onDelete: (id: string) => void;
 }
 
-export default function ProjectCard({ project, taskCount, onDelete }: ProjectCardProps) {
+export default function ProjectCard({ project, onDelete }: ProjectCardProps) {
+  const memberCount = project.members?.length || 0;
+
   return (
     <Card className="hover:shadow-xl transition-all border-muted/50 overflow-hidden group">
       <CardHeader className="pb-4">
@@ -39,10 +40,11 @@ export default function ProjectCard({ project, taskCount, onDelete }: ProjectCar
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            {format(new Date(project.createdAt), 'MMM d, yyyy')}
+            {project.createdAt ? format(new Date(project.createdAt), 'MMM d, yyyy') : 'Recently'}
           </span>
-          <span className="font-bold text-foreground">
-            {taskCount} {taskCount === 1 ? 'Task' : 'Tasks'}
+          <span className="flex items-center gap-1 font-bold text-foreground">
+            <Users className="w-3 h-3" />
+            {memberCount} {memberCount === 1 ? 'Member' : 'Members'}
           </span>
         </div>
         <Link href={`/projects/${project.id}`} passHref>
