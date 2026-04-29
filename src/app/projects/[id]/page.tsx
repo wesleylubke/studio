@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
@@ -23,7 +23,8 @@ import {
   Edit2,
   Share2,
   Loader2,
-  UserPlus
+  UserPlus,
+  User
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
@@ -79,19 +80,25 @@ export default function ProjectPage() {
     } else {
       addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
     }
-    setEditingTask(null);
-    setIsTaskDialogOpen(false);
+    // Use the timeout to ensure the dialog close animation has a chance to play
+    // before the state changes unmount any critical Radix elements.
+    setTimeout(() => {
+      setEditingTask(null);
+    }, 100);
   };
 
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
-      setEditingTask(null);
+      // Delay cleaning up the editingTask to prevent Radix from locking the scroll/clicks
+      setTimeout(() => {
+        setEditingTask(null);
+      }, 100);
     }
   };
 
   const handleProjectSubmit = (projectData: any) => {
-    if (!db) return;
+    if (!db || !project) return;
     updateDocumentNonBlocking(doc(db, 'projects', project.id), {
       name: projectData.name,
       description: projectData.description
@@ -115,7 +122,9 @@ export default function ProjectPage() {
 
   const handleDeleteTask = (taskId: string) => {
     if (!db) return;
-    deleteDocumentNonBlocking(doc(db, 'projects', id, 'tasks', taskId));
+    if (confirm('Are you sure you want to delete this task?')) {
+      deleteDocumentNonBlocking(doc(db, 'projects', id, 'tasks', taskId));
+    }
   };
 
   const handleDeleteProject = () => {
@@ -294,6 +303,7 @@ export default function ProjectPage() {
                   <thead className="bg-muted/30 border-b text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Task Name</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4">Assignee</th>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Duration</th>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Status</th>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Progress</th>
@@ -306,6 +316,20 @@ export default function ProjectPage() {
                         <td className="px-4 sm:px-6 py-3 sm:py-4">
                           <p className="font-semibold text-xs sm:text-sm">{task.name}</p>
                           <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{task.description}</p>
+                        </td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4">
+                          {task.assigneeEmail ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                <User className="w-3 h-3 text-primary" />
+                              </div>
+                              <span className="text-[10px] sm:text-xs font-medium truncate max-w-[120px]">
+                                {task.assigneeEmail}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] sm:text-xs text-muted-foreground italic">Unassigned</span>
+                          )}
                         </td>
                         <td className="px-4 sm:px-6 py-3 sm:py-4">
                           <div className="text-[10px] sm:text-xs">
@@ -360,7 +384,7 @@ export default function ProjectPage() {
                     ))}
                     {(!projectTasks || projectTasks.length === 0) && (
                       <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-sm">
+                        <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground text-sm">
                           No tasks created for this project yet.
                         </td>
                       </tr>
@@ -378,6 +402,7 @@ export default function ProjectPage() {
         onOpenChange={handleTaskDialogChange} 
         onSubmit={handleTaskSubmit}
         initialTask={editingTask}
+        projectMembers={project.members}
       />
 
       <ProjectDialog

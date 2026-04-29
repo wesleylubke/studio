@@ -102,6 +102,10 @@
         },
         "progress": {
           "type": "number"
+        },
+        "assigneeEmail": {
+          "type": "string",
+          "description": "The email of the user assigned to this task."
         }
       },
       "required": [

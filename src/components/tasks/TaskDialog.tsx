@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,22 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Task } from '@/types';
 import { format } from 'date-fns';
+import { User } from 'lucide-react';
 
 interface TaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (task: Omit<Task, 'id' | 'projectId'>) => void;
   initialTask?: Task;
+  projectMembers?: string[];
 }
 
-export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask }: TaskDialogProps) {
+export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, projectMembers = [] }: TaskDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [progress, setProgress] = useState(0);
+  const [assigneeEmail, setAssigneeEmail] = useState<string>('unassigned');
 
   useEffect(() => {
     if (initialTask) {
@@ -30,18 +35,27 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask }
       setStartDate(initialTask.startDate);
       setEndDate(initialTask.endDate);
       setProgress(initialTask.progress);
+      setAssigneeEmail(initialTask.assigneeEmail || 'unassigned');
     } else {
       setName('');
       setDescription('');
       setStartDate(format(new Date(), 'yyyy-MM-dd'));
       setEndDate(format(new Date(), 'yyyy-MM-dd'));
       setProgress(0);
+      setAssigneeEmail('unassigned');
     }
   }, [initialTask, open]);
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSubmit({ name, description, startDate, endDate, progress });
+    onSubmit({ 
+      name, 
+      description, 
+      startDate, 
+      endDate, 
+      progress,
+      assigneeEmail: assigneeEmail === 'unassigned' ? undefined : assigneeEmail
+    });
     onOpenChange(false);
   };
 
@@ -64,6 +78,32 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask }
               className="bg-background"
             />
           </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="assignee" className="text-sm font-semibold">Assignee</Label>
+            <Select value={assigneeEmail} onValueChange={setAssigneeEmail}>
+              <SelectTrigger id="assignee" className="w-full">
+                <SelectValue placeholder="Select a member" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 opacity-50" />
+                    <span>Unassigned</span>
+                  </div>
+                </SelectItem>
+                {projectMembers.map((member) => (
+                  <SelectItem key={member} value={member}>
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-primary" />
+                      <span>{member}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="start-date" className="text-sm font-semibold">Start Date</Label>
@@ -110,7 +150,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask }
             />
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button className="bg-primary" onClick={handleSubmit}>
             {initialTask ? 'Save Changes' : 'Create Task'}

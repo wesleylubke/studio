@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, User } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
@@ -128,7 +128,9 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
               >
                 <div className="flex flex-col truncate pr-2">
                    <span className="truncate">{task.name}</span>
-                   <span className="text-[9px] sm:text-[10px] text-muted-foreground">{task.progress}%</span>
+                   <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+                     {task.assigneeEmail ? task.assigneeEmail.split('@')[0] : `${task.progress}%`}
+                   </span>
                 </div>
                 
                 <DropdownMenu>
@@ -186,7 +188,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                         {/* Accent highlight */}
                         <div className="absolute inset-0 border border-primary/20 rounded-full" />
                         
-                        {/* Task name inside if wide enough */}
+                        {/* Task info inside if wide enough */}
                         {task.duration > 60 && (
                           <div className="absolute inset-0 flex items-center px-2 pointer-events-none">
                             <span className="text-[8px] sm:text-[9px] font-bold text-white truncate drop-shadow-sm">
@@ -198,11 +200,23 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                     </TooltipTrigger>
                     <TooltipContent side="top" className="bg-popover border text-foreground p-2 sm:p-3 rounded-lg shadow-xl max-w-[200px]">
                       <div className="space-y-1">
-                        <p className="font-bold text-xs">{task.name}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-bold text-xs truncate">{task.name}</p>
+                          <Badge variant="outline" className="text-[8px] h-4">
+                            {task.progress}%
+                          </Badge>
+                        </div>
                         <p className="text-[10px] text-muted-foreground line-clamp-2">{task.description}</p>
-                        <div className="flex justify-between gap-4 pt-1 border-t">
-                          <span className="text-[9px] text-primary">{format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}</span>
-                          <span className="text-[9px] font-bold">{task.progress}%</span>
+                        {task.assigneeEmail && (
+                          <div className="flex items-center gap-1.5 py-1">
+                            <User className="w-3 h-3 text-primary" />
+                            <span className="text-[9px] text-primary font-medium truncate">{task.assigneeEmail}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between gap-4 pt-1 border-t mt-1">
+                          <span className="text-[9px] text-muted-foreground">
+                            {format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}
+                          </span>
                         </div>
                       </div>
                     </TooltipContent>
