@@ -103,9 +103,12 @@
         "progress": {
           "type": "number"
         },
-        "assigneeEmail": {
-          "type": "string",
-          "description": "The email of the user assigned to this task."
+        "assigneeEmails": {
+          "type": "array",
+          "description": "List of emails of the users assigned to this task.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

@@ -67,7 +67,7 @@ export default function Home() {
           startDate: format(start, 'yyyy-MM-dd'),
           endDate: format(end, 'yyyy-MM-dd'),
           progress: 0,
-          assigneeEmail: null
+          assigneeEmails: []
         });
       });
     }

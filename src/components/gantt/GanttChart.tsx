@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Edit, Trash2, User } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, User, Users } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
@@ -69,6 +69,10 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
       }
     }
   }, [dateRange, tasks.length]);
+
+  const getDisplayName = (email: string) => {
+    return email.split('@')[0].replace(/[._]/g, ' ');
+  };
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border overflow-hidden shadow-2xl">
@@ -128,8 +132,10 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
               >
                 <div className="flex flex-col truncate pr-1">
                    <span className="truncate">{task.name}</span>
-                   <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate">
-                     {task.assigneeEmail ? task.assigneeEmail.split('@')[0] : `${task.progress}%`}
+                   <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate capitalize">
+                     {task.assigneeEmails && task.assigneeEmails.length > 0 
+                       ? task.assigneeEmails.map(e => getDisplayName(e)).join(', ') 
+                       : `${task.progress}%`}
                    </span>
                 </div>
                 
@@ -141,8 +147,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem 
-                      onSelect={() => {
-                        // Delay to allow dropdown to close and restore body interaction
+                      onSelect={(e) => {
+                        e.preventDefault();
                         setTimeout(() => onTaskEdit?.(task), 100);
                       }}
                     >
@@ -208,10 +214,19 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                           </Badge>
                         </div>
                         <p className="text-[10px] text-muted-foreground line-clamp-2">{task.description}</p>
-                        {task.assigneeEmail && (
-                          <div className="flex items-center gap-1.5 py-1">
-                            <User className="w-3 h-3 text-primary" />
-                            <span className="text-[9px] text-primary font-medium truncate">{task.assigneeEmail}</span>
+                        {task.assigneeEmails && task.assigneeEmails.length > 0 && (
+                          <div className="flex flex-col gap-1 py-1 border-t mt-1">
+                             <div className="flex items-center gap-1.5">
+                               <Users className="w-3 h-3 text-primary" />
+                               <span className="text-[9px] text-primary font-bold">Assignees:</span>
+                             </div>
+                             <div className="flex flex-wrap gap-1">
+                               {task.assigneeEmails.map(email => (
+                                 <Badge key={email} variant="secondary" className="text-[8px] px-1 h-3 capitalize">
+                                   {getDisplayName(email)}
+                                 </Badge>
+                               ))}
+                             </div>
                           </div>
                         )}
                         <div className="flex justify-between gap-4 pt-1 border-t mt-1">

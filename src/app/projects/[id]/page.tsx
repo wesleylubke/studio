@@ -24,7 +24,8 @@ import {
   Share2,
   Loader2,
   UserPlus,
-  User
+  User,
+  Users
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
@@ -41,6 +42,7 @@ import { updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlo
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
@@ -76,7 +78,6 @@ export default function ProjectPage() {
   const handleTaskSubmit = (taskData: any) => {
     if (!db) return;
     
-    // Close the dialog first to let the UI clean up correctly
     setIsTaskDialogOpen(false);
 
     if (editingTask) {
@@ -129,6 +130,10 @@ export default function ProjectPage() {
       deleteDocumentNonBlocking(doc(db, 'projects', project.id));
       router.push('/');
     }
+  };
+
+  const getDisplayName = (email: string) => {
+    return email.split('@')[0].replace(/[._]/g, ' ');
   };
 
   if (isUserLoading || (user && (isProjectLoading || isTasksLoading))) {
@@ -299,7 +304,7 @@ export default function ProjectPage() {
                   <thead className="bg-muted/30 border-b text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Task Name</th>
-                      <th className="px-4 sm:px-6 py-3 sm:py-4">Assignee</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4">Assignees</th>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Duration</th>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Status</th>
                       <th className="px-4 sm:px-6 py-3 sm:py-4">Progress</th>
@@ -314,14 +319,26 @@ export default function ProjectPage() {
                           <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{task.description}</p>
                         </td>
                         <td className="px-4 sm:px-6 py-3 sm:py-4">
-                          {task.assigneeEmail ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                                <User className="w-3 h-3 text-primary" />
-                              </div>
-                              <span className="text-[10px] sm:text-xs font-medium truncate max-w-[120px]">
-                                {task.assigneeEmail}
-                              </span>
+                          {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
+                            <div className="flex -space-x-2">
+                              {task.assigneeEmails.map((email: string, idx: number) => (
+                                <TooltipProvider key={email}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className={cn(
+                                        "w-6 h-6 rounded-full border-2 border-card bg-primary/10 flex items-center justify-center cursor-help",
+                                        idx > 0 && "z-[idx]"
+                                      )}>
+                                        <User className="w-3 h-3 text-primary" />
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-[10px] font-bold capitalize">{getDisplayName(email)}</p>
+                                      <p className="text-[8px] opacity-70">{email}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ))}
                             </div>
                           ) : (
                             <span className="text-[10px] sm:text-xs text-muted-foreground italic">Unassigned</span>
@@ -365,8 +382,9 @@ export default function ProjectPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem 
-                                onSelect={() => {
-                                  setTimeout(() => handleEditTaskClick(task), 100);
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  handleEditTaskClick(task);
                                 }}
                               >
                                 Edit Task
@@ -439,7 +457,7 @@ export default function ProjectPage() {
               <div className="space-y-1 max-h-[150px] overflow-y-auto pr-1">
                 {project.members.map((member: string) => (
                   <div key={member} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border text-xs">
-                    <span className="truncate mr-2">{member}</span>
+                    <span className="truncate mr-2 capitalize">{getDisplayName(member)}</span>
                     {member === project.ownerEmail && <Badge variant="outline" className="text-[8px] h-4 flex-shrink-0">OWNER</Badge>}
                   </div>
                 ))}

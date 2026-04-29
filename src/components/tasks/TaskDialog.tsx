@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Task } from '@/types';
 import { format } from 'date-fns';
-import { User } from 'lucide-react';
+import { User, Users } from 'lucide-react';
 
 interface TaskDialogProps {
   open: boolean;
@@ -26,7 +27,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [progress, setProgress] = useState(0);
-  const [assigneeEmail, setAssigneeEmail] = useState<string>('unassigned');
+  const [assigneeEmails, setAssigneeEmails] = useState<string[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -36,14 +37,14 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
         setStartDate(initialTask.startDate || format(new Date(), 'yyyy-MM-dd'));
         setEndDate(initialTask.endDate || format(new Date(), 'yyyy-MM-dd'));
         setProgress(initialTask.progress || 0);
-        setAssigneeEmail(initialTask.assigneeEmail || 'unassigned');
+        setAssigneeEmails(initialTask.assigneeEmails || []);
       } else {
         setName('');
         setDescription('');
         setStartDate(format(new Date(), 'yyyy-MM-dd'));
         setEndDate(format(new Date(), 'yyyy-MM-dd'));
         setProgress(0);
-        setAssigneeEmail('unassigned');
+        setAssigneeEmails([]);
       }
     }
   }, [initialTask, open]);
@@ -51,17 +52,26 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const handleSubmit = () => {
     if (!name.trim()) return;
     
-    // Explicitly handle unassigned to avoid undefined in Firestore
-    const finalAssignee = (assigneeEmail === 'unassigned' || !assigneeEmail) ? null : assigneeEmail;
-
     onSubmit({ 
       name, 
       description, 
       startDate, 
       endDate, 
       progress,
-      assigneeEmail: finalAssignee as any
+      assigneeEmails
     });
+  };
+
+  const toggleAssignee = (email: string) => {
+    setAssigneeEmails(prev => 
+      prev.includes(email) 
+        ? prev.filter(e => e !== email) 
+        : [...prev, email]
+    );
+  };
+
+  const getDisplayName = (email: string) => {
+    return email.split('@')[0].replace(/[._]/g, ' ');
   };
 
   return (
@@ -85,28 +95,33 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="assignee" className="text-sm font-semibold">Assignee</Label>
-            <Select value={assigneeEmail} onValueChange={setAssigneeEmail}>
-              <SelectTrigger id="assignee" className="w-full">
-                <SelectValue placeholder="Select a member" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 opacity-50" />
-                    <span>Unassigned</span>
-                  </div>
-                </SelectItem>
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Assignees
+            </Label>
+            <ScrollArea className="h-[120px] rounded-md border p-2 bg-background/50">
+              <div className="space-y-2">
                 {projectMembers.map((member) => (
-                  <SelectItem key={member} value={member}>
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-primary" />
-                      <span>{member}</span>
-                    </div>
-                  </SelectItem>
+                  <div key={member} className="flex items-center space-x-2 p-1 hover:bg-muted/50 rounded transition-colors">
+                    <Checkbox 
+                      id={`member-${member}`} 
+                      checked={assigneeEmails.includes(member)}
+                      onCheckedChange={() => toggleAssignee(member)}
+                    />
+                    <label 
+                      htmlFor={`member-${member}`}
+                      className="text-xs font-medium leading-none cursor-pointer capitalize"
+                    >
+                      {getDisplayName(member)}
+                      <span className="block text-[10px] text-muted-foreground font-normal">{member}</span>
+                    </label>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+                {projectMembers.length === 0 && (
+                  <p className="text-[10px] text-muted-foreground italic p-2 text-center">No members available</p>
+                )}
+              </div>
+            </ScrollArea>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
