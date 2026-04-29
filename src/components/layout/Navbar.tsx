@@ -19,6 +19,11 @@ export default function Navbar() {
     try {
       await signInWithPopup(auth, provider);
     } catch (error: any) {
+      // Gracefully handle when the user closes the popup without signing in
+      if (error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+
       console.error("Firebase Auth Error:", error);
       
       if (error.code === 'auth/operation-not-allowed') {
