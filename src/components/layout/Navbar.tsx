@@ -31,7 +31,9 @@ export default function Navbar() {
       } else if (error.code === 'auth/popup-blocked') {
         errorMessage = "The login popup was blocked by your browser. Please allow popups for this site.";
       } else if (error.code === 'auth/unauthorized-domain') {
-        errorMessage = "This domain is not authorized for Firebase Authentication. Add it to the list of authorized domains in the Firebase Console.";
+        title = "Unauthorized Domain";
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
+        errorMessage = `This domain (${domain}) is not authorized for Firebase Authentication. Please add it to the authorized domains in the Firebase Console (Authentication > Settings > Authorized domains).`;
       }
 
       toast({
