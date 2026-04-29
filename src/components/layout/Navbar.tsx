@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -20,20 +21,20 @@ export default function Navbar() {
     try {
       await initiateGoogleSignIn(auth);
     } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') return;
+      
       console.error("Detailed Login Error:", error);
       
       let errorMessage = error.message || "An unexpected error occurred. Please try again.";
       let title = "Login Failed";
 
       if (error.code === 'auth/operation-not-allowed') {
-        title = "Sign-in Provider Disabled";
-        errorMessage = "Google Sign-In is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.";
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = "The login popup was blocked by your browser. Please allow popups for this site.";
+        title = "Provider Disabled";
+        errorMessage = "Google Sign-In is not enabled in Firebase Console.";
       } else if (error.code === 'auth/unauthorized-domain') {
         title = "Unauthorized Domain";
         const domain = typeof window !== 'undefined' ? window.location.hostname : 'this domain';
-        errorMessage = `This domain (${domain}) is not authorized for Firebase Authentication. Please add it to the authorized domains in the Firebase Console (Authentication > Settings > Authorized domains).`;
+        errorMessage = `Please add ${domain} to Firebase authorized domains.`;
       }
 
       toast({
@@ -49,50 +50,50 @@ export default function Navbar() {
   const handleLogout = () => signOut(auth);
 
   return (
-    <nav className="border-b bg-card px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <nav className="border-b bg-card px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2 group">
-        <div className="bg-primary p-2 rounded-lg group-hover:scale-110 transition-transform">
-          <GanttIcon className="w-5 h-5 text-primary-foreground" />
+        <div className="bg-primary p-1.5 sm:p-2 rounded-lg group-hover:scale-110 transition-transform">
+          <GanttIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
         </div>
-        <span className="font-headline font-bold text-xl tracking-tight text-foreground">
+        <span className="font-headline font-bold text-lg sm:text-xl tracking-tight text-foreground">
           Gantt<span className="text-primary">Flow</span>
         </span>
       </Link>
       
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3 sm:gap-6">
         {user && (
-          <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
-            <LayoutDashboard className="w-4 h-4" />
-            Projects
+          <Link href="/" className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 sm:gap-2">
+            <LayoutDashboard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">Dashboard</span>
           </Link>
         )}
 
         {isUserLoading ? (
-          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-muted-foreground" />
         ) : (
           user ? (
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end mr-2 hidden sm:flex">
-                <span className="text-xs font-bold">{user.displayName}</span>
-                <span className="text-[10px] text-muted-foreground">{user.email}</span>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="hidden md:flex flex-col items-end mr-1">
+                <span className="text-xs font-bold leading-none mb-0.5">{user.displayName}</span>
+                <span className="text-[10px] text-muted-foreground leading-none">{user.email}</span>
               </div>
-              <Avatar className="h-8 w-8 border">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 border">
                 <AvatarImage src={user.photoURL || undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary">
-                  <UserIcon className="w-4 h-4" />
+                  <UserIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </AvatarFallback>
               </Avatar>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground h-8 px-2 sm:px-3 text-xs sm:text-sm">
+                <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </div>
           ) : (
-            <Button size="sm" onClick={handleLogin} disabled={isLoggingIn}>
+            <Button size="sm" onClick={handleLogin} disabled={isLoggingIn} className="h-8 sm:h-9 text-xs sm:text-sm px-3 sm:px-4">
               {isLoggingIn ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2 animate-spin" />
               ) : (
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
               )}
               Sign In
             </Button>

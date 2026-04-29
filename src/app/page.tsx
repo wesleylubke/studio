@@ -19,7 +19,6 @@ export default function Home() {
 
   const projectsQuery = useMemoFirebase(() => {
     if (!db || !user || !user.email) return null;
-    // Filter projects where the user's email is in the members list
     return query(collection(db, 'projects'), where('members', 'array-contains', user.email));
   }, [db, user]);
 
@@ -62,7 +61,9 @@ export default function Home() {
 
   const handleDeleteProject = (projectId: string) => {
     if (!db) return;
-    deleteDocumentNonBlocking(doc(db, 'projects', projectId));
+    if (confirm('Are you sure you want to delete this project?')) {
+      deleteDocumentNonBlocking(doc(db, 'projects', projectId));
+    }
   };
 
   if (isUserLoading || (user && isProjectsLoading)) {
@@ -80,17 +81,22 @@ export default function Home() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-6">
-          <h1 className="text-5xl font-extrabold tracking-tight max-w-2xl">
-            Master your project timelines with <span className="text-primary">GanttFlow</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-xl">
-            The easiest way to visualize progress and collaborate with your team in real-time.
-          </p>
-          <div className="bg-card p-12 rounded-3xl border shadow-2xl border-primary/20">
-            <Sparkles className="w-12 h-12 text-primary mx-auto mb-6" />
-            <h3 className="text-2xl font-bold mb-4">Ready to start?</h3>
-            <p className="text-muted-foreground mb-8">Sign in with your Google account to create your first portfolio.</p>
+        <main className="flex-grow flex flex-col items-center justify-center p-6 sm:p-8 text-center space-y-8">
+          <div className="max-w-3xl space-y-4">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight">
+              Master your project timelines with <span className="text-primary">GanttFlow</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">
+              The easiest way to visualize progress and collaborate with your team in real-time.
+            </p>
+          </div>
+          <div className="bg-card p-8 sm:p-12 rounded-3xl border shadow-2xl border-primary/20 max-w-md w-full">
+            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto mb-6" />
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">Ready to start?</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-8">Sign in with your Google account to create your first portfolio.</p>
+            <Button className="w-full bg-primary hover:bg-primary/90 rounded-full h-12 text-lg">
+              Get Started
+            </Button>
           </div>
         </main>
       </div>
@@ -101,18 +107,18 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow p-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end mb-12">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-headline font-extrabold tracking-tight">
+      <main className="flex-grow p-4 sm:p-8 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8 sm:mb-12">
+          <div className="space-y-1 sm:space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-headline font-extrabold tracking-tight">
               Your <span className="text-primary">Portfolios</span>
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-sm sm:text-lg text-muted-foreground">
               Organize workflows and visualize project progress.
             </p>
           </div>
           <Button 
-            className="rounded-full px-6 shadow-lg bg-primary hover:bg-primary/90 hover:scale-105 transition-all"
+            className="w-full sm:w-auto rounded-full px-8 h-12 shadow-lg bg-primary hover:bg-primary/90 hover:scale-105 transition-all text-sm font-bold"
             onClick={() => setIsDialogOpen(true)}
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -121,7 +127,7 @@ export default function Home() {
         </div>
 
         {projects && projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {projects.map(project => (
               <ProjectCard 
                 key={project.id} 
@@ -131,18 +137,18 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-muted rounded-2xl bg-muted/10 space-y-6">
-            <div className="bg-muted p-6 rounded-full">
-              <LayoutTemplate className="w-12 h-12 text-muted-foreground opacity-50" />
+          <div className="flex flex-col items-center justify-center py-16 sm:py-24 border-2 border-dashed border-muted rounded-2xl bg-muted/10 space-y-6">
+            <div className="bg-muted p-5 sm:p-6 rounded-full">
+              <LayoutTemplate className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground opacity-50" />
             </div>
-            <div className="text-center space-y-2">
-              <h3 className="text-2xl font-bold">No projects yet</h3>
-              <p className="text-muted-foreground max-w-xs">
+            <div className="text-center space-y-2 px-4">
+              <h3 className="text-xl sm:text-2xl font-bold">No projects yet</h3>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-xs mx-auto">
                 Create your first project manually or use our AI assistant to generate a roadmap.
               </p>
             </div>
             <Button 
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-6"
               onClick={() => setIsDialogOpen(true)}
             >
               <Sparkles className="w-4 h-4 mr-2" />

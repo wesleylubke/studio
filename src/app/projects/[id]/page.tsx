@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
@@ -141,8 +141,8 @@ export default function ProjectPage() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-6">
-          <div className="bg-card p-12 rounded-3xl border shadow-2xl border-primary/20 max-w-md w-full">
+        <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 text-center space-y-6">
+          <div className="bg-card p-8 sm:p-12 rounded-3xl border shadow-2xl border-primary/20 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
             <p className="text-muted-foreground mb-8">Please sign in with your Google account to view this project timeline.</p>
             <Button className="w-full" onClick={() => router.push('/')}>Return to Dashboard</Button>
@@ -156,7 +156,7 @@ export default function ProjectPage() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-4">
+        <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 text-center space-y-4">
           <h2 className="text-2xl font-bold">Project not found</h2>
           <p className="text-muted-foreground">This project might have been deleted or you don't have permission to view it.</p>
           <Button variant="outline" onClick={() => router.push('/')}>Return to Dashboard</Button>
@@ -169,10 +169,10 @@ export default function ProjectPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow p-6 flex flex-col space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+      <main className="flex-grow p-4 sm:p-6 flex flex-col space-y-6">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="space-y-1 w-full lg:w-auto">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm mb-1">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -183,37 +183,38 @@ export default function ProjectPage() {
               </Button>
               <span className="hover:text-foreground cursor-pointer" onClick={() => router.push('/')}>Projects</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-foreground font-medium">{project.name}</span>
+              <span className="text-foreground font-medium truncate max-w-[150px] sm:max-w-none">{project.name}</span>
             </div>
-            <h1 className="text-3xl font-headline font-bold flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-headline font-bold flex flex-wrap items-center gap-2 sm:gap-3">
               {project.name}
-              <Badge variant="secondary" className="bg-primary/20 text-primary border-none">
+              <Badge variant="secondary" className="bg-primary/20 text-primary border-none text-[10px] sm:text-xs">
                 {stats.avgProgress}% Overall
               </Badge>
             </h1>
-            <p className="text-muted-foreground text-sm max-w-2xl">{project.description}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm max-w-2xl">{project.description}</p>
           </div>
           
-          <div className="flex items-center gap-3">
-             <Button variant="outline" onClick={() => setIsShareDialogOpen(true)}>
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+             <Button variant="outline" size="sm" className="flex-1 lg:flex-none" onClick={() => setIsShareDialogOpen(true)}>
                <Share2 className="w-4 h-4 mr-2" />
                Share
              </Button>
-             <Button variant="outline" onClick={() => setIsProjectDialogOpen(true)}>
+             <Button variant="outline" size="sm" className="flex-1 lg:flex-none" onClick={() => setIsProjectDialogOpen(true)}>
                <Edit2 className="w-4 h-4 mr-2" />
                Edit
              </Button>
              {user?.uid === project.ownerId && (
                <Button 
                 variant="outline" 
-                className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
+                size="sm"
+                className="flex-1 lg:flex-none border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
                 onClick={handleDeleteProject}
                >
                  <Trash2 className="w-4 h-4 mr-2" />
                  Delete
                </Button>
              )}
-             <Button className="bg-primary hover:bg-primary/90 shadow-lg" onClick={() => {
+             <Button size="sm" className="w-full lg:w-auto bg-primary hover:bg-primary/90 shadow-lg" onClick={() => {
                setEditingTask(null);
                setIsTaskDialogOpen(true);
              }}>
@@ -223,62 +224,62 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
-            <div className="bg-primary/10 p-3 rounded-lg">
-              <LayoutList className="w-6 h-6 text-primary" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-card border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <div className="bg-primary/10 p-2 sm:p-3 rounded-lg">
+              <LayoutList className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Tasks</p>
-              <p className="text-xl font-bold">{projectTasks?.length || 0}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total</p>
+              <p className="text-lg sm:text-xl font-bold">{projectTasks?.length || 0}</p>
             </div>
           </div>
-          <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
-            <div className="bg-accent/10 p-3 rounded-lg">
-              <CheckCircle2 className="w-6 h-6 text-accent" />
+          <div className="bg-card border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <div className="bg-accent/10 p-2 sm:p-3 rounded-lg">
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Completed</p>
-              <p className="text-xl font-bold">{stats.completed}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Done</p>
+              <p className="text-lg sm:text-xl font-bold">{stats.completed}</p>
             </div>
           </div>
-          <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
-            <div className="bg-primary/10 p-3 rounded-lg">
-              <Clock className="w-6 h-6 text-primary" />
+          <div className="bg-card border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <div className="bg-primary/10 p-2 sm:p-3 rounded-lg">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">In Progress</p>
-              <p className="text-xl font-bold">{(projectTasks?.length || 0) - stats.completed}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Pending</p>
+              <p className="text-lg sm:text-xl font-bold">{(projectTasks?.length || 0) - stats.completed}</p>
             </div>
           </div>
-          <div className="bg-card border rounded-xl p-4 flex items-center gap-4">
-            <div className="bg-muted p-3 rounded-lg">
-              <Settings className="w-6 h-6 text-muted-foreground" />
+          <div className="bg-card border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <div className="bg-muted p-2 sm:p-3 rounded-lg">
+              <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Avg. Progress</p>
-              <p className="text-xl font-bold">{stats.avgProgress}%</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Avg.</p>
+              <p className="text-lg sm:text-xl font-bold">{stats.avgProgress}%</p>
             </div>
           </div>
         </div>
 
-        <div className="flex-grow flex flex-col">
+        <div className="flex-grow flex flex-col min-h-[400px]">
           <Tabs defaultValue="gantt" className="w-full flex-grow flex flex-col">
-            <div className="flex items-center justify-between border-b pb-2 mb-4">
+            <div className="flex items-center justify-between border-b pb-2 mb-4 overflow-x-auto hide-scrollbar">
               <TabsList className="bg-muted/50 border">
-                <TabsTrigger value="gantt" className="gap-2">
+                <TabsTrigger value="gantt" className="gap-2 text-xs sm:text-sm">
                   <GanttIcon className="w-4 h-4" />
-                  Gantt Chart
+                  Gantt
                 </TabsTrigger>
-                <TabsTrigger value="list" className="gap-2">
+                <TabsTrigger value="list" className="gap-2 text-xs sm:text-sm">
                   <LayoutList className="w-4 h-4" />
-                  Task List
+                  List
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="gantt" className="flex-grow m-0 focus-visible:ring-0">
-              <div className="h-[600px]">
+              <div className="h-[500px] lg:h-[600px]">
                 <GanttChart 
                   tasks={projectTasks || []} 
                   onTaskEdit={handleEditTaskClick}
@@ -288,58 +289,58 @@ export default function ProjectPage() {
             </TabsContent>
 
             <TabsContent value="list" className="m-0 focus-visible:ring-0">
-              <div className="bg-card border rounded-xl overflow-hidden shadow-lg">
-                <table className="w-full text-left">
-                  <thead className="bg-muted/30 border-b text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="bg-card border rounded-xl overflow-x-auto shadow-lg">
+                <table className="w-full text-left min-w-[600px]">
+                  <thead className="bg-muted/30 border-b text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     <tr>
-                      <th className="px-6 py-4">Task Name</th>
-                      <th className="px-6 py-4">Duration</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4">Progress</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4">Task Name</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4">Duration</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4">Status</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4">Progress</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {projectTasks?.map(task => (
                       <tr key={task.id} className="hover:bg-muted/10 transition-colors group">
-                        <td className="px-6 py-4">
-                          <p className="font-semibold text-sm">{task.name}</p>
-                          <p className="text-xs text-muted-foreground truncate max-w-xs">{task.description}</p>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4">
+                          <p className="font-semibold text-xs sm:text-sm">{task.name}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{task.description}</p>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="text-xs">
+                        <td className="px-4 sm:px-6 py-3 sm:py-4">
+                          <div className="text-[10px] sm:text-xs">
                             <p className="font-medium">{format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}</p>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-3 sm:py-4">
                           <Badge 
                             variant="secondary" 
                             className={cn(
-                              "text-[10px] border-none",
+                              "text-[9px] sm:text-[10px] border-none px-1.5 py-0",
                               task.progress === 100 ? "bg-green-500/10 text-green-500" :
                               task.progress > 0 ? "bg-blue-500/10 text-blue-500" :
                               "bg-muted text-muted-foreground"
                             )}
                           >
-                            {task.progress === 100 ? 'COMPLETED' : task.progress > 0 ? 'IN PROGRESS' : 'NOT STARTED'}
+                            {task.progress === 100 ? 'DONE' : task.progress > 0 ? 'ACTIVE' : 'NEW'}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden flex-shrink-0">
+                        <td className="px-4 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-16 sm:w-24 h-1 sm:h-1.5 bg-muted rounded-full overflow-hidden flex-shrink-0">
                               <div 
                                 className="h-full bg-primary" 
                                 style={{ width: `${task.progress}%` }}
                               />
                             </div>
-                            <span className="text-xs font-bold text-muted-foreground">{task.progress}%</span>
+                            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground">{task.progress}%</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+                                <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -359,7 +360,7 @@ export default function ProjectPage() {
                     ))}
                     {(!projectTasks || projectTasks.length === 0) && (
                       <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-sm">
                           No tasks created for this project yet.
                         </td>
                       </tr>
@@ -387,41 +388,42 @@ export default function ProjectPage() {
       />
 
       <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <UserPlus className="w-5 h-5 text-primary" />
               Share Project
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm">
               Invite other users to collaborate on this project by entering their email address.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
               <Input 
                 id="email" 
                 placeholder="colleague@example.com" 
                 value={shareEmail}
                 onChange={(e) => setShareEmail(e.target.value)}
+                className="text-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Current Members</Label>
-              <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Current Members</Label>
+              <div className="space-y-1 max-h-[150px] overflow-y-auto pr-1">
                 {project.members.map((member: string) => (
-                  <div key={member} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border text-sm">
-                    <span>{member}</span>
-                    {member === project.ownerEmail && <Badge variant="outline" className="text-[8px] h-4">OWNER</Badge>}
+                  <div key={member} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border text-xs">
+                    <span className="truncate mr-2">{member}</span>
+                    {member === project.ownerEmail && <Badge variant="outline" className="text-[8px] h-4 flex-shrink-0">OWNER</Badge>}
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleShareSubmit} disabled={!shareEmail}>Invite</Button>
+          <DialogFooter className="flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setIsShareDialogOpen(false)}>Cancel</Button>
+            <Button className="flex-1" onClick={handleShareSubmit} disabled={!shareEmail}>Invite</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

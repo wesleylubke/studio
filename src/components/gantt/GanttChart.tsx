@@ -64,7 +64,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
       const today = startOfDay(new Date());
       const todayIndex = dateRange.findIndex(d => format(d, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'));
       if (todayIndex !== -1) {
-        chartRef.current.scrollLeft = Math.max(0, (todayIndex * DAY_WIDTH) - 200);
+        chartRef.current.scrollLeft = Math.max(0, (todayIndex * DAY_WIDTH) - 100);
       }
     }
   }, [dateRange, tasks.length]);
@@ -72,8 +72,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border overflow-hidden shadow-2xl">
       <div className="flex border-b bg-muted/30 backdrop-blur-sm sticky top-0 z-20">
-        <div className="w-64 flex-shrink-0 border-r p-4 font-semibold text-sm text-muted-foreground flex items-center justify-between">
-          <span>Task Name</span>
+        <div className="w-40 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground flex items-center justify-between">
+          <span>Task</span>
         </div>
         
         <div className="overflow-x-auto hide-scrollbar flex-grow" ref={chartRef}>
@@ -94,18 +94,18 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                   style={{ width: DAY_WIDTH }}
                 >
                   {isFirstOfMonth && (
-                    <span className="absolute -top-1 left-1 text-[10px] font-bold text-primary uppercase tracking-wider">
+                    <span className="absolute -top-1 left-1 text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-wider">
                       {format(date, 'MMM')}
                     </span>
                   )}
                   <span className={cn(
-                    "text-[10px] font-medium text-muted-foreground uppercase",
+                    "text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase",
                     isToday && "text-primary font-bold"
                   )}>
                     {format(date, 'EEE').charAt(0)}
                   </span>
                   <span className={cn(
-                    "text-xs font-bold",
+                    "text-[10px] sm:text-xs font-bold",
                     isToday && "text-primary"
                   )}>
                     {format(date, 'd')}
@@ -118,35 +118,35 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
       </div>
 
       <div className="flex-grow overflow-auto custom-scrollbar">
-        <div className="flex">
+        <div className="flex min-h-full">
           {/* Sidebar Task List */}
-          <div className="w-64 flex-shrink-0 border-r divide-y bg-card/50">
+          <div className="w-40 sm:w-64 flex-shrink-0 border-r divide-y bg-card/50">
             {chartData.map(task => (
               <div 
                 key={task.id} 
-                className="h-12 px-4 flex items-center justify-between text-sm font-medium hover:bg-muted/50 transition-colors group"
+                className="h-12 px-3 sm:px-4 flex items-center justify-between text-xs sm:text-sm font-medium hover:bg-muted/50 transition-colors group"
               >
-                <div className="flex flex-col truncate">
+                <div className="flex flex-col truncate pr-2">
                    <span className="truncate">{task.name}</span>
-                   <span className="text-[10px] text-muted-foreground">{task.progress}% complete</span>
+                   <span className="text-[9px] sm:text-[10px] text-muted-foreground">{task.progress}%</span>
                 </div>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreVertical className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 opacity-40 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                      <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onTaskEdit?.(task)}>
-                      <Edit className="w-4 h-4 mr-2" />
+                      <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Edit Task
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="text-destructive" 
                       onClick={() => onTaskDelete?.(task.id)}
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Delete Task
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -154,15 +154,15 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
               </div>
             ))}
             {tasks.length === 0 && (
-              <div className="h-12 px-4 flex items-center text-xs italic text-muted-foreground">
-                No tasks added yet
+              <div className="h-12 px-4 flex items-center text-[10px] sm:text-xs italic text-muted-foreground">
+                No tasks
               </div>
             )}
           </div>
 
           {/* Timeline View */}
           <div 
-            className="flex-grow gantt-grid relative" 
+            className="flex-grow gantt-grid relative min-h-full" 
             style={{ width: dateRange.length * DAY_WIDTH }}
           >
             {chartData.map((task, i) => (
@@ -171,7 +171,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div 
-                        className="absolute top-2 h-8 rounded-full shadow-lg transition-all hover:scale-[1.02] cursor-pointer overflow-hidden group"
+                        className="absolute top-2.5 h-7 rounded-full shadow-lg transition-all hover:scale-[1.02] cursor-pointer overflow-hidden group"
                         style={{ 
                           left: task.startOffset, 
                           width: task.duration,
@@ -184,25 +184,25 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                           style={{ width: `${task.progress}%` }}
                         />
                         {/* Accent highlight */}
-                        <div className="absolute inset-0 border-2 border-primary/20 rounded-full" />
+                        <div className="absolute inset-0 border border-primary/20 rounded-full" />
                         
                         {/* Task name inside if wide enough */}
-                        {task.duration > 80 && (
-                          <div className="absolute inset-0 flex items-center px-3 pointer-events-none">
-                            <span className="text-[10px] font-bold text-white truncate drop-shadow-sm">
+                        {task.duration > 60 && (
+                          <div className="absolute inset-0 flex items-center px-2 pointer-events-none">
+                            <span className="text-[8px] sm:text-[9px] font-bold text-white truncate drop-shadow-sm">
                               {task.progress}%
                             </span>
                           </div>
                         )}
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-popover border text-foreground p-3 rounded-lg shadow-xl">
+                    <TooltipContent side="top" className="bg-popover border text-foreground p-2 sm:p-3 rounded-lg shadow-xl max-w-[200px]">
                       <div className="space-y-1">
-                        <p className="font-bold">{task.name}</p>
-                        <p className="text-xs text-muted-foreground">{task.description}</p>
-                        <div className="flex justify-between gap-4 pt-1">
-                          <span className="text-[10px] text-primary">{format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}</span>
-                          <span className="text-[10px] font-bold">{task.progress}% Done</span>
+                        <p className="font-bold text-xs">{task.name}</p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-2">{task.description}</p>
+                        <div className="flex justify-between gap-4 pt-1 border-t">
+                          <span className="text-[9px] text-primary">{format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}</span>
+                          <span className="text-[9px] font-bold">{task.progress}%</span>
                         </div>
                       </div>
                     </TooltipContent>
@@ -218,7 +218,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                return (
                  <div 
                    key="today-line" 
-                   className="absolute top-0 bottom-0 w-px bg-primary z-10 pointer-events-none opacity-50"
+                   className="absolute top-0 bottom-0 w-[2px] bg-primary z-10 pointer-events-none opacity-40"
                    style={{ left: idx * DAY_WIDTH + (DAY_WIDTH / 2) }}
                  />
                );
