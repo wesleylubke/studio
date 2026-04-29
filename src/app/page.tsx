@@ -108,7 +108,7 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow p-4 sm:p-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8 sm:mb-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-6 mb-6 sm:mb-10">
           <div className="space-y-1 sm:space-y-2">
             <h1 className="text-3xl sm:text-4xl font-headline font-extrabold tracking-tight">
               Your <span className="text-primary">Portfolios</span>
