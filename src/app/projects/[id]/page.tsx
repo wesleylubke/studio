@@ -53,14 +53,12 @@ export default function ProjectPage() {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [shareEmail, setShareEmail] = useState('');
 
-  // Memoize the document reference only if the user is authenticated to prevent permission errors
   const projectRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'projects', id);
   }, [db, id, user]);
   const { data: project, isLoading: isProjectLoading } = useDoc(projectRef);
 
-  // Memoize the tasks collection query only if the user is authenticated
   const tasksQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return collection(db, 'projects', id, 'tasks');
@@ -74,7 +72,6 @@ export default function ProjectPage() {
     return { avgProgress, completed };
   }, [projectTasks]);
 
-  // Handle loading states for authentication and data fetching
   if (isUserLoading || (user && (isProjectLoading || isTasksLoading))) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -86,7 +83,6 @@ export default function ProjectPage() {
     );
   }
 
-  // Handle unauthenticated state
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -102,7 +98,6 @@ export default function ProjectPage() {
     );
   }
 
-  // Handle "Not Found" or "Forbidden" state
   if (!project) {
     return (
       <div className="min-h-screen flex flex-col">

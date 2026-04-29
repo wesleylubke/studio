@@ -19,18 +19,18 @@ export default function Navbar() {
     try {
       await signInWithPopup(auth, provider);
     } catch (error: any) {
-      console.error("Login failed:", error);
+      console.error("Firebase Auth Error:", error);
       
       if (error.code === 'auth/operation-not-allowed') {
         toast({
           title: "Sign-in Provider Disabled",
-          description: "Google Sign-In needs to be enabled in your Firebase Console under Authentication > Sign-in method. Please enable it to allow users to sign in.",
+          description: "Google Sign-In must be enabled in the Firebase Console. Go to Authentication > Sign-in method and enable the Google provider.",
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Sign-in Failed",
-          description: error.message || "An unexpected error occurred during login.",
+          title: "Login Failed",
+          description: error.message || "An unexpected error occurred. Please try again.",
           variant: "destructive"
         });
       }
