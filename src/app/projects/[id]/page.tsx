@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
 import TaskDialog from '@/components/tasks/TaskDialog';
 import { useProjectStore } from '@/lib/store';
+import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, 
