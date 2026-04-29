@@ -29,14 +29,14 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const [assigneeEmail, setAssigneeEmail] = useState<string>('unassigned');
 
   useEffect(() => {
-    if (initialTask) {
+    if (initialTask && open) {
       setName(initialTask.name);
       setDescription(initialTask.description);
       setStartDate(initialTask.startDate);
       setEndDate(initialTask.endDate);
       setProgress(initialTask.progress);
       setAssigneeEmail(initialTask.assigneeEmail || 'unassigned');
-    } else {
+    } else if (!initialTask && open) {
       setName('');
       setDescription('');
       setStartDate(format(new Date(), 'yyyy-MM-dd'));
@@ -56,12 +56,11 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
       progress,
       assigneeEmail: assigneeEmail === 'unassigned' ? undefined : assigneeEmail
     });
-    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-xl font-headline font-bold">
             {initialTask ? 'Edit Task' : 'Add New Task'}
