@@ -73,7 +73,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border overflow-hidden shadow-2xl">
       <div className="flex border-b bg-muted/30 backdrop-blur-sm sticky top-0 z-20">
-        <div className="w-40 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground flex items-center justify-between">
+        <div className="w-24 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground flex items-center justify-between">
           <span>Task</span>
         </div>
         
@@ -121,22 +121,22 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
       <div className="flex-grow overflow-auto custom-scrollbar">
         <div className="flex min-h-full">
           {/* Sidebar Task List */}
-          <div className="w-40 sm:w-64 flex-shrink-0 border-r divide-y bg-card/50">
+          <div className="w-24 sm:w-64 flex-shrink-0 border-r divide-y bg-card/50">
             {chartData.map(task => (
               <div 
                 key={task.id} 
-                className="h-12 px-3 sm:px-4 flex items-center justify-between text-xs sm:text-sm font-medium hover:bg-muted/50 transition-colors group"
+                className="h-12 px-2 sm:px-4 flex items-center justify-between text-[10px] sm:text-sm font-medium hover:bg-muted/50 transition-colors group"
               >
-                <div className="flex flex-col truncate pr-2">
+                <div className="flex flex-col truncate pr-1">
                    <span className="truncate">{task.name}</span>
-                   <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+                   <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate">
                      {task.assigneeEmail ? task.assigneeEmail.split('@')[0] : `${task.progress}%`}
                    </span>
                 </div>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 opacity-40 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 opacity-40 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                       <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </DropdownMenuTrigger>

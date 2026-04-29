@@ -29,38 +29,44 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const [assigneeEmail, setAssigneeEmail] = useState<string>('unassigned');
 
   useEffect(() => {
-    if (initialTask && open) {
-      setName(initialTask.name);
-      setDescription(initialTask.description);
-      setStartDate(initialTask.startDate);
-      setEndDate(initialTask.endDate);
-      setProgress(initialTask.progress);
-      setAssigneeEmail(initialTask.assigneeEmail || 'unassigned');
-    } else if (!initialTask && open) {
-      setName('');
-      setDescription('');
-      setStartDate(format(new Date(), 'yyyy-MM-dd'));
-      setEndDate(format(new Date(), 'yyyy-MM-dd'));
-      setProgress(0);
-      setAssigneeEmail('unassigned');
+    if (open) {
+      if (initialTask) {
+        setName(initialTask.name || '');
+        setDescription(initialTask.description || '');
+        setStartDate(initialTask.startDate || format(new Date(), 'yyyy-MM-dd'));
+        setEndDate(initialTask.endDate || format(new Date(), 'yyyy-MM-dd'));
+        setProgress(initialTask.progress || 0);
+        setAssigneeEmail(initialTask.assigneeEmail || 'unassigned');
+      } else {
+        setName('');
+        setDescription('');
+        setStartDate(format(new Date(), 'yyyy-MM-dd'));
+        setEndDate(format(new Date(), 'yyyy-MM-dd'));
+        setProgress(0);
+        setAssigneeEmail('unassigned');
+      }
     }
   }, [initialTask, open]);
 
   const handleSubmit = () => {
     if (!name.trim()) return;
+    
+    // Use null instead of undefined for Firestore compatibility
+    const finalAssignee = assigneeEmail === 'unassigned' ? null : assigneeEmail;
+
     onSubmit({ 
       name, 
       description, 
       startDate, 
       endDate, 
       progress,
-      assigneeEmail: assigneeEmail === 'unassigned' ? undefined : assigneeEmail
+      assigneeEmail: finalAssignee as any
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-headline font-bold">
             {initialTask ? 'Edit Task' : 'Add New Task'}

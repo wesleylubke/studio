@@ -76,7 +76,7 @@ export default function ProjectPage() {
   const handleTaskSubmit = (taskData: any) => {
     if (!db) return;
     
-    // Close the dialog first to let Radix UI start its cleanup
+    // Close the dialog first to let the UI clean up correctly
     setIsTaskDialogOpen(false);
 
     if (editingTask) {
@@ -85,18 +85,14 @@ export default function ProjectPage() {
       addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
     }
     
-    // Cleanup editing state after animation completes
-    setTimeout(() => {
-      setEditingTask(null);
-    }, 250);
+    // Cleanup editing state
+    setEditingTask(null);
   };
 
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
-      setTimeout(() => {
-        setEditingTask(null);
-      }, 250);
+      setEditingTask(null);
     }
   };
 
