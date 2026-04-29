@@ -384,14 +384,17 @@ export default function ProjectPage() {
                               <DropdownMenuItem 
                                 onSelect={(e) => {
                                   e.preventDefault();
-                                  handleEditTaskClick(task);
+                                  setTimeout(() => handleEditTaskClick(task), 100);
                                 }}
                               >
                                 Edit Task
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-destructive" 
-                                onClick={() => handleDeleteTask(task.id)}
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  handleDeleteTask(task.id);
+                                }}
                               >
                                 Delete Task
                               </DropdownMenuItem>

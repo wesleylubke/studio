@@ -157,7 +157,10 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="text-destructive" 
-                      onClick={() => onTaskDelete?.(task.id)}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        onTaskDelete?.(task.id);
+                      }}
                     >
                       <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Delete Task
