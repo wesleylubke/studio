@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { LayoutDashboard, GanttChartSquare, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, GanttChart, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ export default function Navbar() {
       if (error.code === 'auth/operation-not-allowed') {
         toast({
           title: "Sign-in Provider Disabled",
-          description: "Google Sign-In needs to be enabled in your Firebase Console under Authentication > Sign-in method.",
+          description: "Google Sign-In needs to be enabled in your Firebase Console under Authentication > Sign-in method. Please enable it to allow users to sign in.",
           variant: "destructive"
         });
       } else {
@@ -43,7 +43,7 @@ export default function Navbar() {
     <nav className="border-b bg-card px-6 py-4 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2 group">
         <div className="bg-primary p-2 rounded-lg group-hover:scale-110 transition-transform">
-          <GanttChartSquare className="w-5 h-5 text-primary-foreground" />
+          <GanttChart className="w-5 h-5 text-primary-foreground" />
         </div>
         <span className="font-headline font-bold text-xl tracking-tight text-foreground">
           Gantt<span className="text-primary">Flow</span>
@@ -61,6 +61,10 @@ export default function Navbar() {
         {!isUserLoading && (
           user ? (
             <div className="flex items-center gap-4">
+              <div className="flex flex-col items-end mr-2 hidden sm:flex">
+                <span className="text-xs font-bold">{user.displayName}</span>
+                <span className="text-[10px] text-muted-foreground">{user.email}</span>
+              </div>
               <Avatar className="h-8 w-8 border">
                 <AvatarImage src={user.photoURL || undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary">
