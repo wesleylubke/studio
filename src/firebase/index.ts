@@ -2,14 +2,22 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 export function initializeFirebase() {
-  // Ensure we only initialize once and always use the provided config
-  const app = getApps().length === 0 
-    ? initializeApp(firebaseConfig) 
-    : getApp();
+  let app: FirebaseApp;
+  
+  if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+    // Initialize Auth persistence once
+    const auth = getAuth(app);
+    setPersistence(auth, browserLocalPersistence).catch(err => {
+      console.error("Firebase persistence error:", err);
+    });
+  } else {
+    app = getApp();
+  }
     
   return getSdks(app);
 }

@@ -70,6 +70,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
       (error) => {
+        console.error("Auth state change error:", error);
         setUserAuthState({ user: null, isUserLoading: false, userError: error });
       }
     );
@@ -86,8 +87,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
         displayName: userAuthState.user.displayName,
         photoURL: userAuthState.user.photoURL,
         lastLogin: new Date().toISOString()
-      }, { merge: true }).catch(() => {
-        // Silently fail if user doesn't have permission to write their own record yet
+      }, { merge: true }).catch((err) => {
+        console.warn("User profile sync failed (possibly permission rules):", err);
       });
     }
   }, [userAuthState.user?.uid, firestore]);

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, GanttChart, LogIn, LogOut, User as UserIcon, Loader2 } from 'lucide-react';
+import { LayoutDashboard, GanttChart as GanttIcon, LogIn, LogOut, User as UserIcon, Loader2 } from 'lucide-react';
 import { useAuth, useUser, initiateGoogleSignIn } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -20,21 +20,25 @@ export default function Navbar() {
     try {
       await initiateGoogleSignIn(auth);
     } catch (error: any) {
-      console.error("Login Error:", error);
+      console.error("Detailed Login Error:", error);
       
+      let errorMessage = error.message || "An unexpected error occurred. Please try again.";
+      let title = "Login Failed";
+
       if (error.code === 'auth/operation-not-allowed') {
-        toast({
-          title: "Sign-in Provider Disabled",
-          description: "Google Sign-In is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.",
-          variant: "destructive"
-        });
-      } else if (error.code !== 'auth/popup-closed-by-user') {
-        toast({
-          title: "Login Failed",
-          description: error.message || "An unexpected error occurred. Please try again.",
-          variant: "destructive"
-        });
+        title = "Sign-in Provider Disabled";
+        errorMessage = "Google Sign-In is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.";
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = "The login popup was blocked by your browser. Please allow popups for this site.";
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = "This domain is not authorized for Firebase Authentication. Add it to the list of authorized domains in the Firebase Console.";
       }
+
+      toast({
+        title,
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsLoggingIn(false);
     }
@@ -46,7 +50,7 @@ export default function Navbar() {
     <nav className="border-b bg-card px-6 py-4 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2 group">
         <div className="bg-primary p-2 rounded-lg group-hover:scale-110 transition-transform">
-          <GanttChart className="w-5 h-5 text-primary-foreground" />
+          <GanttIcon className="w-5 h-5 text-primary-foreground" />
         </div>
         <span className="font-headline font-bold text-xl tracking-tight text-foreground">
           Gantt<span className="text-primary">Flow</span>
