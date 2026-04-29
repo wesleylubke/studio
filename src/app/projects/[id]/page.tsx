@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -43,7 +44,7 @@ import { Label } from '@/components/ui/label';
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
 
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
@@ -52,10 +53,18 @@ export default function ProjectPage() {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [shareEmail, setShareEmail] = useState('');
 
-  const projectRef = useMemoFirebase(() => db ? doc(db, 'projects', id) : null, [db, id]);
+  // Memoize the document reference only if the user is authenticated to prevent permission errors
+  const projectRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'projects', id);
+  }, [db, id, user]);
   const { data: project, isLoading: isProjectLoading } = useDoc(projectRef);
 
-  const tasksQuery = useMemoFirebase(() => db ? collection(db, 'projects', id, 'tasks') : null, [db, id]);
+  // Memoize the tasks collection query only if the user is authenticated
+  const tasksQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'projects', id, 'tasks');
+  }, [db, id, user]);
   const { data: projectTasks, isLoading: isTasksLoading } = useCollection(tasksQuery);
 
   const stats = useMemo(() => {
@@ -65,7 +74,8 @@ export default function ProjectPage() {
     return { avgProgress, completed };
   }, [projectTasks]);
 
-  if (isProjectLoading || isTasksLoading) {
+  // Handle loading states for authentication and data fetching
+  if (isUserLoading || (user && (isProjectLoading || isTasksLoading))) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -76,11 +86,32 @@ export default function ProjectPage() {
     );
   }
 
+  // Handle unauthenticated state
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-6">
+          <div className="bg-card p-12 rounded-3xl border shadow-2xl border-primary/20 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+            <p className="text-muted-foreground mb-8">Please sign in with your Google account to view this project timeline.</p>
+            <Button className="w-full" onClick={() => router.push('/')}>Return to Dashboard</Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Handle "Not Found" or "Forbidden" state
   if (!project) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Project not found or Access Denied</h2>
-        <Button onClick={() => router.push('/')}>Return to Dashboard</Button>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-4">
+          <h2 className="text-2xl font-bold">Project not found</h2>
+          <p className="text-muted-foreground">This project might have been deleted or you don't have permission to view it.</p>
+          <Button variant="outline" onClick={() => router.push('/')}>Return to Dashboard</Button>
+        </main>
       </div>
     );
   }
