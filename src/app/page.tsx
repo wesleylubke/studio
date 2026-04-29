@@ -8,14 +8,16 @@ import ProjectDialog from '@/components/projects/ProjectDialog';
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useAuth, useCollection, useMemoFirebase, initiateGoogleSignIn } from '@/firebase';
 import { collection, doc, query, where } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const db = useFirestore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const projectsQuery = useMemoFirebase(() => {
     if (!db || !user || !user.email) return null;
@@ -23,6 +25,17 @@ export default function Home() {
   }, [db, user]);
 
   const { data: projects, isLoading: isProjectsLoading } = useCollection(projectsQuery);
+
+  const handleLogin = async () => {
+    setIsLoginLoading(true);
+    try {
+      await initiateGoogleSignIn(auth);
+    } catch (error) {
+      console.error("Login failed", error);
+    } finally {
+      setIsLoginLoading(false);
+    }
+  };
 
   const handleCreateProject = async ({ name, description, tasks: aiTasks }: { name: string; description: string; tasks?: any[] }) => {
     if (!user || !db) return;
@@ -53,7 +66,8 @@ export default function Home() {
           description: task.description,
           startDate: format(start, 'yyyy-MM-dd'),
           endDate: format(end, 'yyyy-MM-dd'),
-          progress: 0
+          progress: 0,
+          assigneeEmail: null
         });
       });
     }
@@ -94,7 +108,12 @@ export default function Home() {
             <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto mb-6" />
             <h3 className="text-xl sm:text-2xl font-bold mb-4">Ready to start?</h3>
             <p className="text-sm sm:text-base text-muted-foreground mb-8">Sign in with your Google account to create your first portfolio.</p>
-            <Button className="w-full bg-primary hover:bg-primary/90 rounded-full h-12 text-lg">
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 rounded-full h-12 text-lg"
+              onClick={handleLogin}
+              disabled={isLoginLoading}
+            >
+              {isLoginLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
               Get Started
             </Button>
           </div>

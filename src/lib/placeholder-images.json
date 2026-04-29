@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-team",
+      "description": "A team of professionals collaborating on a project plan.",
+      "imageUrl": "https://picsum.photos/seed/teamwork/1200/600",
+      "imageHint": "team collaboration"
+    },
+    {
+      "id": "project-dashboard",
+      "description": "A clean view of a project timeline or chart.",
+      "imageUrl": "https://picsum.photos/seed/dashboard/800/600",
+      "imageHint": "project management"
+    }
+  ]
 }
