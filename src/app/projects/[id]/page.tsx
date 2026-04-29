@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -185,7 +186,12 @@ export default function ProjectPage() {
 
             <TabsContent value="gantt" className="flex-grow m-0 focus-visible:ring-0">
               <div className="h-[600px]">
-                <GanttChart tasks={projectTasks} onTaskUpdate={updateTask} />
+                <GanttChart 
+                  tasks={projectTasks} 
+                  onTaskUpdate={updateTask} 
+                  onTaskEdit={handleEditClick}
+                  onTaskDelete={deleteTask}
+                />
               </div>
             </TabsContent>
 

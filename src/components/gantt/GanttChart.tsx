@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useRef, useEffect } from 'react';
@@ -5,16 +6,26 @@ import { format, differenceInDays, addDays, startOfDay, min, max, eachDayOfInter
 import { Task } from '@/types';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
   onTaskUpdate?: (id: string, updates: Partial<Task>) => void;
+  onTaskEdit?: (task: Task) => void;
+  onTaskDelete?: (id: string) => void;
 }
 
 const DAY_WIDTH = 40;
 const ROW_HEIGHT = 48;
 
-export default function GanttChart({ tasks }: GanttChartProps) {
+export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const { chartData, dateRange } = useMemo(() => {
@@ -50,7 +61,6 @@ export default function GanttChart({ tasks }: GanttChartProps) {
 
   useEffect(() => {
     if (chartRef.current && tasks.length > 0) {
-      // Find today and scroll to it if it exists in range
       const today = startOfDay(new Date());
       const todayIndex = dateRange.findIndex(d => format(d, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'));
       if (todayIndex !== -1) {
@@ -114,12 +124,33 @@ export default function GanttChart({ tasks }: GanttChartProps) {
             {chartData.map(task => (
               <div 
                 key={task.id} 
-                className="h-12 px-4 flex items-center text-sm font-medium hover:bg-muted/50 transition-colors group"
+                className="h-12 px-4 flex items-center justify-between text-sm font-medium hover:bg-muted/50 transition-colors group"
               >
                 <div className="flex flex-col truncate">
                    <span className="truncate">{task.name}</span>
                    <span className="text-[10px] text-muted-foreground">{task.progress}% complete</span>
                 </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onTaskEdit?.(task)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Task
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="text-destructive" 
+                      onClick={() => onTaskDelete?.(task.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Task
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ))}
             {tasks.length === 0 && (
