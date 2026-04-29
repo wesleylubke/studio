@@ -7,17 +7,33 @@ import { useAuth, useUser } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Navbar() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
+  const { toast } = useToast();
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      
+      if (error.code === 'auth/operation-not-allowed') {
+        toast({
+          title: "Sign-in Provider Disabled",
+          description: "Google Sign-In needs to be enabled in your Firebase Console under Authentication > Sign-in method.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Sign-in Failed",
+          description: error.message || "An unexpected error occurred during login.",
+          variant: "destructive"
+        });
+      }
     }
   };
 

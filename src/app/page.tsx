@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, query, where } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
 
 export default function Home() {
@@ -18,8 +18,9 @@ export default function Home() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const projectsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return collection(db, 'projects');
+    if (!db || !user || !user.email) return null;
+    // Filter projects where the user's email is in the members list
+    return query(collection(db, 'projects'), where('members', 'array-contains', user.email));
   }, [db, user]);
 
   const { data: projects, isLoading: isProjectsLoading } = useCollection(projectsQuery);
