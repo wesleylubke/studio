@@ -90,6 +90,7 @@ export default function ProjectPage() {
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
+      // Clear editing state only after a delay to prevent flickering
       setTimeout(() => setEditingTask(null), 100);
     }
   };
@@ -106,15 +107,18 @@ export default function ProjectPage() {
   const handleShareSubmit = () => {
     if (!db || !shareEmail) return;
     updateDocumentNonBlocking(doc(db, 'projects', id), {
-      members: arrayUnion(shareEmail.trim())
+      members: arrayUnion(shareEmail.trim().toLowerCase())
     });
     setShareEmail('');
     setIsShareDialogOpen(false);
   };
 
   const handleEditTaskClick = (task: any) => {
-    setEditingTask(task);
-    setIsTaskDialogOpen(true);
+    // Timeout prevents conflict with dropdown closing
+    setTimeout(() => {
+      setEditingTask(task);
+      setIsTaskDialogOpen(true);
+    }, 100);
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -384,7 +388,7 @@ export default function ProjectPage() {
                               <DropdownMenuItem 
                                 onSelect={(e) => {
                                   e.preventDefault();
-                                  setTimeout(() => handleEditTaskClick(task), 100);
+                                  handleEditTaskClick(task);
                                 }}
                               >
                                 Edit Task

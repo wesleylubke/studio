@@ -58,7 +58,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
       startDate, 
       endDate, 
       progress,
-      assigneeEmails
+      assigneeEmails: assigneeEmails.length > 0 ? assigneeEmails : []
     });
   };
 

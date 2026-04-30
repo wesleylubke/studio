@@ -149,7 +149,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                     <DropdownMenuItem 
                       onSelect={(e) => {
                         e.preventDefault();
-                        setTimeout(() => onTaskEdit?.(task), 100);
+                        onTaskEdit?.(task);
                       }}
                     >
                       <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
