@@ -75,9 +75,8 @@ export default function Home() {
 
   const handleDeleteProject = (projectId: string) => {
     if (!db) return;
-    if (confirm('Are you sure you want to delete this project?')) {
-      deleteDocumentNonBlocking(doc(db, 'projects', projectId));
-    }
+    // A confirmação agora é feita via modal no componente ProjectCard
+    deleteDocumentNonBlocking(doc(db, 'projects', projectId));
   };
 
   if (isUserLoading || (user && isProjectsLoading)) {
@@ -130,10 +129,10 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-6 mb-6 sm:mb-10">
           <div className="space-y-1 sm:space-y-2">
             <h1 className="text-3xl sm:text-4xl font-headline font-extrabold tracking-tight">
-              Your <span className="text-primary">Portfolios</span>
+              Seu <span className="text-primary">Portfólio</span>
             </h1>
             <p className="text-sm sm:text-lg text-muted-foreground">
-              Organize workflows and visualize project progress.
+              Organize fluxos e vizualise suas tarefas em tempo real.
             </p>
           </div>
           <Button 
@@ -141,7 +140,7 @@ export default function Home() {
             onClick={() => setIsDialogOpen(true)}
           >
             <Plus className="w-5 h-5 mr-2" />
-            New Project
+            Novo Projeto
           </Button>
         </div>
 
@@ -161,7 +160,7 @@ export default function Home() {
               <LayoutTemplate className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground opacity-50" />
             </div>
             <div className="text-center space-y-2 px-4">
-              <h3 className="text-xl sm:text-2xl font-bold">No projects yet</h3>
+              <h3 className="text-xl sm:text-2xl font-bold">Nenhum projeto ainda</h3>
               <p className="text-sm sm:text-base text-muted-foreground max-w-xs mx-auto">
                 Create your first project manually or use our AI assistant to generate a roadmap.
               </p>

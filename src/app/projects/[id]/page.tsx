@@ -274,9 +274,11 @@ export default function ProjectPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onSelect={(e) => {
-                                e.preventDefault();
-                                setEditingTask(task);
-                                setIsTaskDialogOpen(true);
+                                e.preventDefault(); // Critical fix for UI freeze
+                                setTimeout(() => {
+                                  setEditingTask(task);
+                                  setIsTaskDialogOpen(true);
+                                }, 100);
                               }}>
                                 Edit Task
                               </DropdownMenuItem>

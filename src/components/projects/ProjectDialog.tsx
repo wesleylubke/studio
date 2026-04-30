@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -23,6 +24,16 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
   const [description, setDescription] = useState('');
   const [isAIPlanning, setIsAIPlanning] = useState(false);
   const { toast } = useToast();
+
+  // Safety net for Radix UI pointer-events lock
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (initialProject) {
