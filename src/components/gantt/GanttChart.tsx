@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Edit, Trash2, User, Users } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Users } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
@@ -24,7 +24,6 @@ interface GanttChartProps {
 }
 
 const DAY_WIDTH = 40;
-const ROW_HEIGHT = 48;
 
 export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
@@ -70,21 +69,23 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
     }
   }, [dateRange, tasks.length]);
 
-  const getDisplayName = (email: string) => {
-    return email.split('@')[0].replace(/[._]/g, ' ');
+  const getFriendlyName = (email: string) => {
+    return email.split('@')[0]
+      .split(/[._-]/)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
   };
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border overflow-hidden shadow-2xl">
       <div className="flex border-b bg-muted/30 backdrop-blur-sm sticky top-0 z-20">
-        <div className="w-24 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground flex items-center justify-between">
+        <div className="w-24 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground">
           <span>Task</span>
         </div>
         
         <div className="overflow-x-auto hide-scrollbar flex-grow" ref={chartRef}>
           <div className="flex" style={{ width: dateRange.length * DAY_WIDTH }}>
             {dateRange.map((date, idx) => {
-              const isFirstOfMonth = format(date, 'd') === '1';
               const isSatSun = isWeekend(date);
               const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
@@ -98,11 +99,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                   )}
                   style={{ width: DAY_WIDTH }}
                 >
-                  {isFirstOfMonth && (
-                    <span className="absolute -top-1 left-1 text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-wider">
-                      {format(date, 'MMM')}
-                    </span>
-                  )}
                   <span className={cn(
                     "text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase",
                     isToday && "text-primary font-bold"
@@ -134,21 +130,21 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                    <span className="truncate">{task.name}</span>
                    <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate capitalize">
                      {task.assigneeEmails && task.assigneeEmails.length > 0 
-                       ? task.assigneeEmails.map(e => getDisplayName(e)).join(', ') 
+                       ? task.assigneeEmails.map(e => getFriendlyName(e)).join(', ') 
                        : `${task.progress}%`}
                    </span>
                 </div>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 opacity-40 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 opacity-40 group-hover:opacity-100 transition-opacity">
                       <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem 
                       onSelect={(e) => {
-                        e.preventDefault();
+                        e.preventDefault(); // Critical for avoiding UI freeze
                         onTaskEdit?.(task);
                       }}
                     >
@@ -169,24 +165,16 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                 </DropdownMenu>
               </div>
             ))}
-            {tasks.length === 0 && (
-              <div className="h-12 px-4 flex items-center text-[10px] sm:text-xs italic text-muted-foreground">
-                No tasks
-              </div>
-            )}
           </div>
 
-          <div 
-            className="flex-grow gantt-grid relative min-h-full" 
-            style={{ width: dateRange.length * DAY_WIDTH }}
-          >
-            {chartData.map((task, i) => (
-              <div key={task.id} className="h-12 relative border-b w-full hover:bg-muted/20 transition-colors">
+          <div className="flex-grow gantt-grid relative min-h-full" style={{ width: dateRange.length * DAY_WIDTH }}>
+            {chartData.map((task) => (
+              <div key={task.id} className="h-12 relative border-b w-full hover:bg-muted/10 transition-colors">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div 
-                        className="absolute top-2.5 h-7 rounded-full shadow-lg transition-all hover:scale-[1.02] cursor-pointer overflow-hidden group"
+                        className="absolute top-2.5 h-7 rounded-full shadow-lg transition-all hover:scale-[1.02] cursor-pointer overflow-hidden"
                         style={{ 
                           left: task.startOffset, 
                           width: task.duration,
@@ -198,27 +186,18 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                           style={{ width: `${task.progress}%` }}
                         />
                         <div className="absolute inset-0 border border-primary/20 rounded-full" />
-                        
-                        {task.duration > 60 && (
-                          <div className="absolute inset-0 flex items-center px-2 pointer-events-none">
-                            <span className="text-[8px] sm:text-[9px] font-bold text-white truncate drop-shadow-sm">
-                              {task.progress}%
-                            </span>
-                          </div>
-                        )}
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-popover border text-foreground p-2 sm:p-3 rounded-lg shadow-xl max-w-[200px]">
-                      <div className="space-y-1">
+                    <TooltipContent side="top" className="bg-popover border p-3 rounded-lg shadow-xl max-w-[200px]">
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <p className="font-bold text-xs truncate">{task.name}</p>
                           <Badge variant="outline" className="text-[8px] h-4">
                             {task.progress}%
                           </Badge>
                         </div>
-                        <p className="text-[10px] text-muted-foreground line-clamp-2">{task.description}</p>
                         {task.assigneeEmails && task.assigneeEmails.length > 0 && (
-                          <div className="flex flex-col gap-1 py-1 border-t mt-1">
+                          <div className="flex flex-col gap-1 border-t pt-1">
                              <div className="flex items-center gap-1.5">
                                <Users className="w-3 h-3 text-primary" />
                                <span className="text-[9px] text-primary font-bold">Assignees:</span>
@@ -226,16 +205,14 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                              <div className="flex flex-wrap gap-1">
                                {task.assigneeEmails.map(email => (
                                  <Badge key={email} variant="secondary" className="text-[8px] px-1 h-3 capitalize">
-                                   {getDisplayName(email)}
+                                   {getFriendlyName(email)}
                                  </Badge>
                                ))}
                              </div>
                           </div>
                         )}
-                        <div className="flex justify-between gap-4 pt-1 border-t mt-1">
-                          <span className="text-[9px] text-muted-foreground">
-                            {format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}
-                          </span>
+                        <div className="text-[9px] text-muted-foreground pt-1">
+                          {format(new Date(task.startDate), 'MMM d')} - {format(new Date(task.endDate), 'MMM d')}
                         </div>
                       </div>
                     </TooltipContent>
@@ -243,18 +220,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                 </TooltipProvider>
               </div>
             ))}
-            
-            {dateRange.map((date, idx) => {
-               const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-               if (!isToday) return null;
-               return (
-                 <div 
-                   key="today-line" 
-                   className="absolute top-0 bottom-0 w-[2px] bg-primary z-10 pointer-events-none opacity-40"
-                   style={{ left: idx * DAY_WIDTH + (DAY_WIDTH / 2) }}
-                 />
-               );
-            })}
           </div>
         </div>
       </div>

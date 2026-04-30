@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Task } from '@/types';
 import { format } from 'date-fns';
-import { User, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 interface TaskDialogProps {
   open: boolean;
@@ -28,6 +28,16 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [progress, setProgress] = useState(0);
   const [assigneeEmails, setAssigneeEmails] = useState<string[]>([]);
+
+  // Safety net for Radix UI pointer-events lock
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -58,7 +68,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
       startDate, 
       endDate, 
       progress,
-      assigneeEmails: assigneeEmails.length > 0 ? assigneeEmails : []
+      assigneeEmails: assigneeEmails || []
     });
   };
 
@@ -70,8 +80,11 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
     );
   };
 
-  const getDisplayName = (email: string) => {
-    return email.split('@')[0].replace(/[._]/g, ' ');
+  const getFriendlyName = (email: string) => {
+    return email.split('@')[0]
+      .split(/[._-]/)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
   };
 
   return (
@@ -99,10 +112,10 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
               <Users className="w-4 h-4" />
               Assignees
             </Label>
-            <ScrollArea className="h-[120px] rounded-md border p-2 bg-background/50">
+            <ScrollArea className="h-[140px] rounded-md border p-2 bg-background/50">
               <div className="space-y-2">
                 {projectMembers.map((member) => (
-                  <div key={member} className="flex items-center space-x-2 p-1 hover:bg-muted/50 rounded transition-colors">
+                  <div key={member} className="flex items-center space-x-2 p-1.5 hover:bg-muted/50 rounded transition-colors">
                     <Checkbox 
                       id={`member-${member}`} 
                       checked={assigneeEmails.includes(member)}
@@ -110,10 +123,10 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
                     />
                     <label 
                       htmlFor={`member-${member}`}
-                      className="text-xs font-medium leading-none cursor-pointer capitalize"
+                      className="text-xs font-medium leading-none cursor-pointer flex flex-col gap-0.5"
                     >
-                      {getDisplayName(member)}
-                      <span className="block text-[10px] text-muted-foreground font-normal">{member}</span>
+                      <span>{getFriendlyName(member)}</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">{member}</span>
                     </label>
                   </div>
                 ))}

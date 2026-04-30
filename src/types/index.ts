@@ -17,5 +17,5 @@ export interface Task {
   startDate: string;
   endDate: string;
   progress: number; // 0 to 100
-  assigneeEmails?: string[];
+  assigneeEmails: string[];
 }
