@@ -7,8 +7,7 @@
  * - SuggestProjectTasksOutput - The return type for the suggestProjectTasks function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {ai, z} from '@/ai/genkit';
 
 const SuggestProjectTasksInputSchema = z.object({
   projectDescription: z
@@ -30,7 +29,12 @@ export type SuggestProjectTasksOutput = z.infer<typeof SuggestProjectTasksOutput
 export async function suggestProjectTasks(
   input: SuggestProjectTasksInput
 ): Promise<SuggestProjectTasksOutput> {
-  return suggestProjectTasksFlow(input);
+  try {
+    return await suggestProjectTasksFlow(input);
+  } catch (error: any) {
+    console.error("Genkit Flow Error:", error);
+    throw new Error(error.message || "Failed to generate tasks");
+  }
 }
 
 const prompt = ai.definePrompt({
@@ -52,6 +56,9 @@ const suggestProjectTasksFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("AI returned no suggestions. Please try a more detailed description.");
+    }
+    return output;
   }
 );

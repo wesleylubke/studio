@@ -25,11 +25,11 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
   const [isAIPlanning, setIsAIPlanning] = useState(false);
   const { toast } = useToast();
 
-  // Safety net for Radix UI pointer-events lock
+  // Robust safety net for Radix UI pointer-events lock
   useEffect(() => {
     if (!open) {
       const timer = setTimeout(() => {
-        document.body.style.pointerEvents = '';
+        document.body.style.pointerEvents = 'auto';
       }, 500);
       return () => clearTimeout(timer);
     }
@@ -47,16 +47,15 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
 
   const handleCreate = async () => {
     if (!name.trim()) return;
-    
     onSubmit({ name, description });
     reset();
   };
 
   const handleAIPlan = async () => {
-    if (!description.trim()) {
+    if (!description.trim() || description.length < 10) {
       toast({
-        title: "Project Description Required",
-        description: "Please provide a description so the AI can suggest tasks.",
+        title: "Mais detalhes necessários",
+        description: "Por favor, forneça uma descrição mais detalhada para que a IA possa sugerir tarefas relevantes.",
         variant: "destructive"
       });
       return;
@@ -65,12 +64,19 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
     setIsAIPlanning(true);
     try {
       const result = await suggestProjectTasks({ projectDescription: description });
-      onSubmit({ name, description, tasks: result.tasks });
-      reset();
-    } catch (error) {
+      if (result && result.tasks) {
+        onSubmit({ name, description, tasks: result.tasks });
+        toast({
+          title: "Sugestão concluída!",
+          description: `${result.tasks.length} tarefas foram geradas com sucesso.`,
+        });
+        reset();
+      }
+    } catch (error: any) {
+      console.error("AI Planning Error:", error);
       toast({
-        title: "AI Suggestion Failed",
-        description: "Could not generate tasks. Please try manually.",
+        title: "Erro no Assistente de IA",
+        description: error.message || "Não foi possível gerar as tarefas. Verifique se a chave da API está configurada.",
         variant: "destructive"
       });
     } finally {
@@ -91,30 +97,30 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-headline font-bold">
-            {initialProject ? 'Edit Project' : 'Launch New Project'}
+            {initialProject ? 'Editar Projeto' : 'Lançar Novo Projeto'}
           </DialogTitle>
           <DialogDescription>
             {initialProject 
-              ? 'Update your project details below.' 
-              : 'Define your project vision. Use the AI tool to auto-generate a timeline.'}
+              ? 'Atualize os detalhes do seu projeto abaixo.' 
+              : 'Defina a visão do seu projeto. Use a IA para gerar um cronograma automaticamente.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name" className="text-sm font-semibold">Project Name</Label>
+            <Label htmlFor="name" className="text-sm font-semibold">Nome do Projeto</Label>
             <Input 
               id="name" 
-              placeholder="e.g., Q4 Marketing Campaign" 
+              placeholder="Ex: Campanha de Marketing Q4" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="bg-background"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
+            <Label htmlFor="description" className="text-sm font-semibold">Descrição</Label>
             <Textarea 
               id="description" 
-              placeholder="What are we building?" 
+              placeholder="O que estamos construindo? Descreva para que a IA possa ajudar." 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="h-24 bg-background"
@@ -126,7 +132,7 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
             <Button 
               variant="outline" 
               onClick={handleAIPlan} 
-              disabled={isAIPlanning || !name}
+              disabled={isAIPlanning || !name || !description}
               className="flex-1 border-accent text-accent hover:bg-accent hover:text-accent-foreground"
             >
               {isAIPlanning ? (
@@ -134,7 +140,7 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
               ) : (
                 <Sparkles className="w-4 h-4 mr-2" />
               )}
-              AI Task Assistant
+              Assistente de IA
             </Button>
           )}
           <Button 
@@ -145,12 +151,12 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
             {initialProject ? (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                Salvar Alterações
               </>
             ) : (
               <>
                 <PlusCircle className="w-4 h-4 mr-2" />
-                Create
+                Criar Manualmente
               </>
             )}
           </Button>
