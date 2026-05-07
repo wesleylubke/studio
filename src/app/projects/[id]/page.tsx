@@ -28,7 +28,7 @@ import {
   ChevronUp,
   ChevronDown
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -286,7 +286,7 @@ export default function ProjectPage() {
                               variant="ghost" 
                               size="icon" 
                               className="h-6 w-6 disabled:opacity-0"
-                              disabled={index === projectTasks.length - 1}
+                              disabled={index === (projectTasks?.length || 0) - 1}
                               onClick={() => handleMoveTask(task.id, 'down')}
                             >
                               <ChevronDown className="w-4 h-4" />
