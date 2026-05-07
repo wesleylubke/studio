@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { format, differenceInDays, addDays, startOfDay, min, max, eachDayOfInterval, isWeekend, isToday as isTodayFns } from 'date-fns';
 import { Task } from '@/types';
 import { cn } from '@/lib/utils';
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown, Calendar, Clock } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
@@ -27,6 +28,11 @@ const DAY_WIDTH = 40;
 
 export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask }: GanttChartProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Estado para controle de arraste
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const { chartData, dateRange, todayOffset } = useMemo(() => {
     const today = startOfDay(new Date());
@@ -69,6 +75,33 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
     }
   }, [todayOffset]);
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    
+    // Não inicia arraste se clicar em botões ou elementos interativos
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('.dropdown-trigger')) return;
+
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Multiplicador para sensibilidade
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   const getFriendlyName = (email: string) => {
     if (!email) return '';
     return email.split('@')[0]
@@ -78,16 +111,23 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
   };
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-xl border overflow-hidden shadow-2xl relative">
+    <div className="flex flex-col h-full bg-card rounded-3xl border overflow-hidden shadow-2xl relative select-none">
       <div 
-        className="flex-grow overflow-auto custom-scrollbar relative" 
+        className={cn(
+          "flex-grow overflow-auto custom-scrollbar relative",
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        )}
         ref={scrollContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
       >
         <div className="inline-flex flex-col min-w-full min-h-full">
           {/* Timeline Header */}
-          <div className="flex sticky top-0 z-30 border-b bg-card/95 backdrop-blur-sm">
-            <div className="w-32 sm:w-64 flex-shrink-0 border-r p-4 font-bold text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-40 bg-card">
-              Tarefas
+          <div className="flex sticky top-0 z-30 border-b bg-card/95 backdrop-blur-md">
+            <div className="w-32 sm:w-64 flex-shrink-0 border-r p-6 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
+              Estrutura de Tarefas
             </div>
             
             <div className="flex" style={{ width: dateRange.length * DAY_WIDTH }}>
@@ -99,21 +139,21 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   <div 
                     key={idx} 
                     className={cn(
-                      "flex-shrink-0 text-center border-r h-16 flex flex-col justify-center transition-colors relative",
+                      "flex-shrink-0 text-center border-r h-20 flex flex-col justify-center transition-colors relative",
                       isSatSun ? "bg-muted/30" : "bg-transparent",
                       isTodayDate && "bg-primary/5"
                     )}
                     style={{ width: DAY_WIDTH }}
                   >
                     <span className={cn(
-                      "text-[10px] font-bold text-muted-foreground uppercase",
+                      "text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-1",
                       isTodayDate && "text-primary"
                     )}>
                       {format(date, 'EEE')}
                     </span>
                     <span className={cn(
-                      "text-xs font-black",
-                      isTodayDate && "text-primary"
+                      "text-sm font-black",
+                      isTodayDate && "text-primary bg-primary/10 rounded-full w-7 h-7 flex items-center justify-center mx-auto"
                     )}>
                       {format(date, 'd')}
                     </span>
@@ -124,54 +164,68 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
           </div>
 
           {/* Grid Content */}
-          <div className="flex flex-col divide-y bg-card/50">
+          <div className="flex flex-col divide-y divide-white/5 bg-card/50">
             {chartData.map((task, index) => (
-              <div key={task.id} className="flex h-14 hover:bg-muted/10 transition-colors group">
+              <div key={task.id} className="flex h-16 hover:bg-primary/5 transition-colors group">
                 {/* Task Label Sidebar */}
-                <div className="w-32 sm:w-64 flex-shrink-0 border-r px-4 flex items-center gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-sm shadow-md">
-                  <div className="flex flex-col">
+                <div className="w-32 sm:w-64 flex-shrink-0 border-r px-4 flex items-center gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-xl">
+                  <div className="flex flex-col opacity-20 group-hover:opacity-100 transition-opacity">
                      <Button 
                        variant="ghost" 
                        size="icon" 
-                       className="h-5 w-5 hover:bg-muted" 
+                       className="h-6 w-6 hover:bg-primary/20 rounded-md" 
                        disabled={index === 0}
-                       onClick={() => onMoveTask?.(task.id, 'up')}
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         onMoveTask?.(task.id, 'up');
+                       }}
                      >
                        <ChevronUp className="w-4 h-4" />
                      </Button>
                      <Button 
                        variant="ghost" 
                        size="icon" 
-                       className="h-5 w-5 hover:bg-muted" 
+                       className="h-6 w-6 hover:bg-primary/20 rounded-md" 
                        disabled={index === chartData.length - 1}
-                       onClick={() => onMoveTask?.(task.id, 'down')}
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         onMoveTask?.(task.id, 'down');
+                       }}
                      >
                        <ChevronDown className="w-4 h-4" />
                      </Button>
                   </div>
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
-                     <span className="truncate text-sm font-bold">{task.name}</span>
-                     <span className="text-[10px] text-muted-foreground font-medium">
-                       {task.progress}% concluído
-                     </span>
+                     <span className="truncate text-sm font-bold group-hover:text-primary transition-colors">{task.name}</span>
+                     <div className="flex items-center gap-2">
+                        <div className="flex-grow h-1 bg-muted rounded-full overflow-hidden max-w-[60px]">
+                           <div className="h-full bg-primary" style={{ width: `${task.progress}%` }} />
+                        </div>
+                        <span className="text-[9px] text-muted-foreground font-black">
+                          {task.progress}%
+                        </span>
+                     </div>
                   </div>
                   
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-20 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenuTrigger asChild className="dropdown-trigger">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={(e) => {
-                        e.preventDefault();
-                        setTimeout(() => onTaskEdit?.(task), 100);
-                      }}>
+                    <DropdownMenuContent align="end" className="rounded-xl p-2 min-w-[160px]">
+                      <DropdownMenuItem 
+                        className="rounded-lg py-2 font-bold" 
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setTimeout(() => onTaskEdit?.(task), 100);
+                        }}
+                      >
                         <Edit className="w-4 h-4 mr-2" /> Editar
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        className="text-destructive" 
+                        className="rounded-lg py-2 font-bold text-destructive" 
                         onSelect={(e) => {
                           e.preventDefault();
                           onTaskDelete?.(task.id);
@@ -192,49 +246,58 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div 
-                          className="absolute top-3.5 h-7 rounded-lg shadow-lg transition-all hover:scale-[1.01] hover:brightness-110 cursor-pointer overflow-hidden border border-white/5"
+                          className={cn(
+                            "absolute top-4 h-8 rounded-xl shadow-xl transition-all hover:scale-[1.02] hover:brightness-110 cursor-pointer overflow-hidden border border-white/10 group/bar",
+                            task.progress === 100 ? "ring-1 ring-accent/30" : "ring-1 ring-primary/30"
+                          )}
                           style={{ 
                             left: task.startOffset, 
                             width: task.duration,
-                            background: 'hsl(var(--muted))'
+                            background: 'hsl(var(--muted)/0.5)'
                           }}
+                          onClick={() => onTaskEdit?.(task)}
                         >
                           <div 
                             className={cn(
-                              "h-full transition-all duration-500",
-                              task.progress === 100 ? "bg-accent" : "bg-primary"
+                              "h-full transition-all duration-700 ease-out flex items-center px-3",
+                              task.progress === 100 ? "bg-accent/80" : "bg-primary/80"
                             )}
                             style={{ width: `${task.progress}%` }}
                           />
+                          <div className="absolute inset-0 flex items-center px-4 pointer-events-none">
+                             <span className="text-[10px] font-black text-white truncate drop-shadow-md">
+                                {task.name}
+                             </span>
+                          </div>
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="p-4 bg-popover border-2 rounded-xl shadow-2xl max-w-xs z-[60]">
-                        <div className="space-y-3">
+                      <TooltipContent side="top" className="p-5 bg-card/95 backdrop-blur-xl border-2 rounded-2xl shadow-2xl max-w-xs z-[60]">
+                        <div className="space-y-4">
                           <div className="flex items-center justify-between gap-4">
-                            <h4 className="font-bold text-sm leading-tight">{task.name}</h4>
-                            <Badge className={cn(task.progress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary")}>
+                            <h4 className="font-black text-sm leading-tight text-primary uppercase tracking-tight">{task.name}</h4>
+                            <Badge className={cn("border-none px-3 py-1 font-black", task.progress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary")}>
                               {task.progress}%
                             </Badge>
                           </div>
                           
                           {task.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 bg-muted/30 p-2 rounded-lg">{task.description}</p>
                           )}
 
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
-                            <span>{format(new Date(task.startDate), 'dd/MM')} — {format(new Date(task.endDate), 'dd/MM')}</span>
+                          <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                            <Calendar className="w-3.5 h-3.5 text-primary" />
+                            <span>{format(new Date(task.startDate), 'dd MMM')} — {format(new Date(task.endDate), 'dd MMM')}</span>
                           </div>
 
                           {task.assigneeEmails && task.assigneeEmails.length > 0 && (
-                            <div className="pt-2 border-t border-muted">
-                               <div className="flex items-center gap-1.5 mb-1.5 text-[10px] font-bold text-primary uppercase">
-                                 <Users className="w-3 h-3" />
+                            <div className="pt-3 border-t border-white/10">
+                               <div className="flex items-center gap-2 mb-2 text-[9px] font-black text-primary uppercase tracking-[0.1em]">
+                                 <Users className="w-3.5 h-3.5" />
                                  <span>Responsáveis</span>
                                </div>
-                               <div className="flex flex-wrap gap-1">
+                               <div className="flex flex-wrap gap-1.5">
                                  {task.assigneeEmails.map(email => (
-                                   <Badge key={email} variant="secondary" className="text-[9px] px-1.5 py-0 capitalize bg-muted-foreground/10">
+                                   <Badge key={email} variant="secondary" className="text-[9px] px-2 py-0.5 capitalize bg-primary/10 text-primary border-none font-bold">
                                      {getFriendlyName(email)}
                                    </Badge>
                                  ))}
