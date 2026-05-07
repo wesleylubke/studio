@@ -18,4 +18,5 @@ export interface Task {
   endDate: string;
   progress: number; // 0 to 100
   assigneeEmails: string[];
+  order: number;
 }

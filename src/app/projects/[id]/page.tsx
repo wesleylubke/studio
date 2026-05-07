@@ -24,9 +24,11 @@ import {
   Loader2,
   UserPlus,
   User,
-  Settings
+  Settings,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Tabs";
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -36,7 +38,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc, arrayUnion } from 'firebase/firestore';
+import { collection, doc, arrayUnion, query, orderBy } from 'firebase/firestore';
 import { updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -63,7 +65,8 @@ export default function ProjectPage() {
 
   const tasksQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return collection(db, 'projects', id, 'tasks');
+    // Explicitly order by 'order' field
+    return query(collection(db, 'projects', id, 'tasks'), orderBy('order', 'asc'));
   }, [db, id, user]);
   const { data: projectTasks, isLoading: isTasksLoading } = useCollection(tasksQuery);
 
@@ -76,12 +79,42 @@ export default function ProjectPage() {
 
   const handleTaskSubmit = (taskData: any) => {
     if (!db) return;
-    setIsTaskDialogOpen(false);
+    
+    // Safety check for assigneeEmails to prevent FirebaseError
+    const finalData = {
+      ...taskData,
+      assigneeEmails: taskData.assigneeEmails || []
+    };
+
     if (editingTask) {
-      updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', editingTask.id), taskData);
+      updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', editingTask.id), finalData);
     } else {
-      addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...taskData, projectId: id });
+      // Add 'order' field for new tasks
+      const nextOrder = projectTasks && projectTasks.length > 0 
+        ? Math.max(...projectTasks.map(t => t.order || 0)) + 1 
+        : 0;
+      addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...finalData, projectId: id, order: nextOrder });
     }
+    
+    // Close first to ensure Radix cleanup
+    setIsTaskDialogOpen(false);
+    setTimeout(() => setEditingTask(null), 300);
+  };
+
+  const handleMoveTask = (taskId: string, direction: 'up' | 'down') => {
+    if (!db || !projectTasks) return;
+    const currentIndex = projectTasks.findIndex(t => t.id === taskId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= projectTasks.length) return;
+
+    const currentTask = projectTasks[currentIndex];
+    const targetTask = projectTasks[targetIndex];
+
+    // Swap orders
+    updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', currentTask.id), { order: targetTask.order });
+    updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', targetTask.id), { order: currentTask.order });
   };
 
   const handleTaskDialogChange = (open: boolean) => {
@@ -92,6 +125,7 @@ export default function ProjectPage() {
   };
 
   const getFriendlyName = (email: string) => {
+    if (!email) return 'User';
     return email.split('@')[0]
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -216,15 +250,17 @@ export default function ProjectPage() {
                   onTaskDelete={(taskId) => {
                     if (confirm('Delete this task?')) deleteDocumentNonBlocking(doc(db, 'projects', id, 'tasks', taskId));
                   }}
+                  onMoveTask={handleMoveTask}
                 />
               </div>
             </TabsContent>
 
             <TabsContent value="list" className="m-0 focus-visible:ring-0">
               <div className="bg-card border rounded-xl overflow-x-auto shadow-lg">
-                <table className="w-full text-left min-w-[600px]">
+                <table className="w-full text-left min-w-[700px]">
                   <thead className="bg-muted/30 border-b text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     <tr>
+                      <th className="px-6 py-4 w-16">Reorder</th>
                       <th className="px-6 py-4">Task Name</th>
                       <th className="px-6 py-4">Assignees</th>
                       <th className="px-6 py-4">Timeline</th>
@@ -233,8 +269,30 @@ export default function ProjectPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {projectTasks?.map(task => (
+                    {projectTasks?.map((task, index) => (
                       <tr key={task.id} className="hover:bg-muted/10 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col items-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 disabled:opacity-0"
+                              disabled={index === 0}
+                              onClick={() => handleMoveTask(task.id, 'up')}
+                            >
+                              <ChevronUp className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 disabled:opacity-0"
+                              disabled={index === projectTasks.length - 1}
+                              onClick={() => handleMoveTask(task.id, 'down')}
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
                         <td className="px-6 py-4">
                           <p className="font-semibold text-sm">{task.name}</p>
                           <p className="text-xs text-muted-foreground truncate max-w-xs">{task.description}</p>
@@ -274,7 +332,7 @@ export default function ProjectPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onSelect={(e) => {
-                                e.preventDefault(); // Critical fix for UI freeze
+                                e.preventDefault(); // Safety against UI freeze
                                 setTimeout(() => {
                                   setEditingTask(task);
                                   setIsTaskDialogOpen(true);

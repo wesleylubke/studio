@@ -109,6 +109,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "order": {
+          "type": "number",
+          "description": "Visual order of the task in the list."
         }
       },
       "required": [
@@ -117,7 +121,8 @@
         "name",
         "startDate",
         "endDate",
-        "progress"
+        "progress",
+        "order"
       ]
     }
   },

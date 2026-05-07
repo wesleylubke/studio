@@ -14,21 +14,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Edit, Trash2, Users } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
   onTaskUpdate?: (id: string, updates: Partial<Task>) => void;
   onTaskEdit?: (task: Task) => void;
   onTaskDelete?: (id: string) => void;
+  onMoveTask?: (id: string, direction: 'up' | 'down') => void;
 }
 
 const DAY_WIDTH = 40;
 
-export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttChartProps) {
+export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask }: GanttChartProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { chartData, dateRange } = useMemo(() => {
+    // Note: Tasks are already sorted by 'order' from the query in the parent page
     if (tasks.length === 0) {
       const today = startOfDay(new Date());
       return {
@@ -64,13 +66,13 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
       const today = startOfDay(new Date());
       const todayIndex = dateRange.findIndex(d => format(d, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'));
       if (todayIndex !== -1) {
-        // Scroll horizontal container to today
         scrollContainerRef.current.scrollLeft = Math.max(0, (todayIndex * DAY_WIDTH) - 200);
       }
     }
   }, [dateRange, tasks.length]);
 
   const getFriendlyName = (email: string) => {
+    if (!email) return '';
     return email.split('@')[0]
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -86,12 +88,10 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
         <div className="inline-flex flex-col min-w-full min-h-full">
           {/* Unified Timeline Header Row */}
           <div className="flex sticky top-0 z-30 border-b bg-muted/90 backdrop-blur-md">
-            {/* Sticky Top-Left Corner */}
-            <div className="w-24 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground sticky left-0 z-40 bg-card">
+            <div className="w-32 sm:w-64 flex-shrink-0 border-r p-3 sm:p-4 font-semibold text-xs sm:text-sm text-muted-foreground sticky left-0 z-40 bg-card">
               <span>Task List</span>
             </div>
             
-            {/* Horizontal Timeline Labels */}
             <div className="flex" style={{ width: dateRange.length * DAY_WIDTH }}>
               {dateRange.map((date, idx) => {
                 const isSatSun = isWeekend(date);
@@ -125,13 +125,34 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
             </div>
           </div>
 
-          {/* Timeline Body Rows */}
           <div className="flex flex-col divide-y bg-card/50">
-            {chartData.map((task) => (
+            {chartData.map((task, index) => (
               <div key={task.id} className="flex h-12 hover:bg-muted/10 transition-colors group">
                 {/* Sticky Left Sidebar Cell */}
-                <div className="w-24 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center justify-between text-[10px] sm:text-sm font-medium sticky left-0 z-10 bg-card/95 backdrop-blur-sm">
-                  <div className="flex flex-col truncate pr-1">
+                <div className="w-32 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center gap-2 text-[10px] sm:text-sm font-medium sticky left-0 z-10 bg-card/95 backdrop-blur-sm">
+                  {/* Reorder controls in sidebar */}
+                  <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       className="h-4 w-4 disabled:opacity-0" 
+                       disabled={index === 0}
+                       onClick={() => onMoveTask?.(task.id, 'up')}
+                     >
+                       <ChevronUp className="w-3 h-3" />
+                     </Button>
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       className="h-4 w-4 disabled:opacity-0" 
+                       disabled={index === chartData.length - 1}
+                       onClick={() => onMoveTask?.(task.id, 'down')}
+                     >
+                       <ChevronDown className="w-3 h-3" />
+                     </Button>
+                  </div>
+
+                  <div className="flex-grow flex flex-col truncate pr-1">
                      <span className="truncate">{task.name}</span>
                      <span className="text-[8px] sm:text-[10px] text-muted-foreground truncate capitalize">
                        {task.assigneeEmails && task.assigneeEmails.length > 0 
@@ -149,7 +170,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem 
                         onSelect={(e) => {
-                          e.preventDefault(); // Critical fix for UI freeze
+                          e.preventDefault(); 
                           setTimeout(() => onTaskEdit?.(task), 100);
                         }}
                       >
@@ -170,7 +191,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete }: GanttCha
                   </DropdownMenu>
                 </div>
 
-                {/* Grid Area - Moves with the single scroll container */}
                 <div className="relative gantt-grid" style={{ width: dateRange.length * DAY_WIDTH }}>
                   <TooltipProvider>
                     <Tooltip>
