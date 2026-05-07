@@ -130,8 +130,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
               <div key={task.id} className="flex h-12 hover:bg-muted/10 transition-colors group">
                 {/* Sticky Left Sidebar Cell */}
                 <div className="w-32 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center gap-2 text-[10px] sm:text-sm font-medium sticky left-0 z-10 bg-card/95 backdrop-blur-sm">
-                  {/* Reorder controls in sidebar */}
-                  <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Reorder controls in sidebar - Made more visible */}
+                  <div className="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
                      <Button 
                        variant="ghost" 
                        size="icon" 

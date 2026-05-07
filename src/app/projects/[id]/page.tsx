@@ -65,7 +65,6 @@ export default function ProjectPage() {
 
   const tasksQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    // Explicitly order by 'order' field
     return query(collection(db, 'projects', id, 'tasks'), orderBy('order', 'asc'));
   }, [db, id, user]);
   const { data: projectTasks, isLoading: isTasksLoading } = useCollection(tasksQuery);
@@ -80,7 +79,6 @@ export default function ProjectPage() {
   const handleTaskSubmit = (taskData: any) => {
     if (!db) return;
     
-    // Safety check for assigneeEmails to prevent FirebaseError
     const finalData = {
       ...taskData,
       assigneeEmails: taskData.assigneeEmails || []
@@ -89,14 +87,12 @@ export default function ProjectPage() {
     if (editingTask) {
       updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', editingTask.id), finalData);
     } else {
-      // Add 'order' field for new tasks
       const nextOrder = projectTasks && projectTasks.length > 0 
         ? Math.max(...projectTasks.map(t => t.order || 0)) + 1 
         : 0;
       addDocumentNonBlocking(collection(db, 'projects', id, 'tasks'), { ...finalData, projectId: id, order: nextOrder });
     }
     
-    // Close first to ensure Radix cleanup
     setIsTaskDialogOpen(false);
     setTimeout(() => setEditingTask(null), 300);
   };
@@ -112,7 +108,6 @@ export default function ProjectPage() {
     const currentTask = projectTasks[currentIndex];
     const targetTask = projectTasks[targetIndex];
 
-    // Swap orders
     updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', currentTask.id), { order: targetTask.order });
     updateDocumentNonBlocking(doc(db, 'projects', id, 'tasks', targetTask.id), { order: currentTask.order });
   };
@@ -260,7 +255,7 @@ export default function ProjectPage() {
                 <table className="w-full text-left min-w-[700px]">
                   <thead className="bg-muted/30 border-b text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     <tr>
-                      <th className="px-6 py-4 w-16">Reorder</th>
+                      <th className="px-6 py-4 w-16 text-center">Reorder</th>
                       <th className="px-6 py-4">Task Name</th>
                       <th className="px-6 py-4">Assignees</th>
                       <th className="px-6 py-4">Timeline</th>
@@ -272,7 +267,7 @@ export default function ProjectPage() {
                     {projectTasks?.map((task, index) => (
                       <tr key={task.id} className="hover:bg-muted/10 transition-colors group">
                         <td className="px-6 py-4">
-                          <div className="flex flex-col items-center gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
+                          <div className="flex flex-col items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -332,7 +327,7 @@ export default function ProjectPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onSelect={(e) => {
-                                e.preventDefault(); // Safety against UI freeze
+                                e.preventDefault();
                                 setTimeout(() => {
                                   setEditingTask(task);
                                   setIsTaskDialogOpen(true);
