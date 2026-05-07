@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -6,7 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectDialog from '@/components/projects/ProjectDialog';
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, LayoutTemplate, Sparkles, Loader2, ArrowRight } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { useUser, useFirestore, useAuth, useCollection, useMemoFirebase, initiateGoogleSignIn } from '@/firebase';
 import { collection, doc, query, where } from 'firebase/firestore';
@@ -67,7 +66,8 @@ export default function Home() {
           startDate: format(start, 'yyyy-MM-dd'),
           endDate: format(end, 'yyyy-MM-dd'),
           progress: 0,
-          assigneeEmails: []
+          assigneeEmails: [],
+          order: index
         });
       });
     }
@@ -75,7 +75,6 @@ export default function Home() {
 
   const handleDeleteProject = (projectId: string) => {
     if (!db) return;
-    // A confirmação agora é feita via modal no componente ProjectCard
     deleteDocumentNonBlocking(doc(db, 'projects', projectId));
   };
 
@@ -84,7 +83,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -94,27 +93,31 @@ export default function Home() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow flex flex-col items-center justify-center p-6 sm:p-8 text-center space-y-8">
-          <div className="max-w-3xl space-y-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight">
-              Master your project timelines with <span className="text-primary">GanttFlow</span>
+        <main className="flex-grow flex flex-col items-center justify-center p-6 sm:p-8 text-center space-y-12">
+          <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-5xl sm:text-7xl font-black tracking-tighter leading-tight">
+              Visualize seu futuro com <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">GanttFlow</span>
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">
-              The easiest way to visualize progress and collaborate with your team in real-time.
+            <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              A maneira mais inteligente de planejar timelines, colaborar em equipe e bater metas em tempo recorde.
             </p>
           </div>
-          <div className="bg-card p-8 sm:p-12 rounded-3xl border shadow-2xl border-primary/20 max-w-md w-full">
-            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto mb-6" />
-            <h3 className="text-xl sm:text-2xl font-bold mb-4">Ready to start?</h3>
-            <p className="text-sm sm:text-base text-muted-foreground mb-8">Sign in with your Google account to create your first portfolio.</p>
-            <Button 
-              className="w-full bg-primary hover:bg-primary/90 rounded-full h-12 text-lg"
-              onClick={handleLogin}
-              disabled={isLoginLoading}
-            >
-              {isLoginLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-              Get Started
-            </Button>
+          
+          <div className="relative group animate-in zoom-in duration-700 delay-300">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <div className="relative bg-card p-10 rounded-3xl border border-white/5 shadow-2xl max-w-md w-full text-center">
+              <Sparkles className="w-12 h-12 text-primary mx-auto mb-6" />
+              <h3 className="text-2xl font-bold mb-4">Pronto para começar?</h3>
+              <p className="text-muted-foreground mb-8">Junte-se a milhares de times que organizam seus projetos com precisão visual.</p>
+              <Button 
+                className="w-full bg-primary hover:bg-primary/90 rounded-full h-14 text-xl font-bold shadow-xl hover:scale-105 transition-all"
+                onClick={handleLogin}
+                disabled={isLoginLoading}
+              >
+                {isLoginLoading ? <Loader2 className="w-6 h-6 animate-spin mr-3" /> : <ArrowRight className="w-6 h-6 mr-3" />}
+                Entrar com Google
+              </Button>
+            </div>
           </div>
         </main>
       </div>
@@ -126,26 +129,28 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow p-4 sm:p-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-6 mb-6 sm:mb-10">
-          <div className="space-y-1 sm:space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-headline font-extrabold tracking-tight">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-12">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black tracking-tight">
               Seu <span className="text-primary">Portfólio</span>
             </h1>
-            <p className="text-sm sm:text-lg text-muted-foreground">
-              Organize fluxos e vizualise suas tarefas em tempo real.
+            <p className="text-lg text-muted-foreground">
+              {projects && projects.length > 0 
+                ? `Você tem ${projects.length} projeto(s) ativos no momento.`
+                : "Comece criando um novo projeto para gerenciar seus fluxos."}
             </p>
           </div>
           <Button 
-            className="w-full sm:w-auto rounded-full px-8 h-12 shadow-lg bg-primary hover:bg-primary/90 hover:scale-105 transition-all text-sm font-bold"
+            className="w-full sm:w-auto rounded-full px-10 h-14 shadow-2xl bg-primary hover:bg-primary/90 hover:scale-105 transition-all text-base font-bold"
             onClick={() => setIsDialogOpen(true)}
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-6 h-6 mr-2" />
             Novo Projeto
           </Button>
         </div>
 
         {projects && projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map(project => (
               <ProjectCard 
                 key={project.id} 
@@ -155,23 +160,32 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 sm:py-24 border-2 border-dashed border-muted rounded-2xl bg-muted/10 space-y-6">
-            <div className="bg-muted p-5 sm:p-6 rounded-full">
-              <LayoutTemplate className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground opacity-50" />
+          <div className="flex flex-col items-center justify-center py-24 sm:py-32 border-2 border-dashed border-muted/50 rounded-3xl bg-muted/5 space-y-8 text-center px-6">
+            <div className="bg-muted p-8 rounded-full shadow-inner">
+              <LayoutTemplate className="w-16 h-16 text-muted-foreground opacity-40" />
             </div>
-            <div className="text-center space-y-2 px-4">
-              <h3 className="text-xl sm:text-2xl font-bold">Nenhum projeto ainda</h3>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-xs mx-auto">
-                Create your first project manually or use our AI assistant to generate a roadmap.
+            <div className="space-y-4 max-w-md">
+              <h3 className="text-3xl font-bold">Nenhum projeto ainda</h3>
+              <p className="text-lg text-muted-foreground">
+                Que tal deixar nossa IA planejar seu primeiro roadmap? Ou comece do zero manualmente.
               </p>
             </div>
-            <Button 
-              className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-6"
-              onClick={() => setIsDialogOpen(true)}
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Try AI Planner
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+              <Button 
+                variant="outline"
+                className="rounded-full px-8 h-12 border-primary text-primary hover:bg-primary/10 font-bold"
+                onClick={() => setIsDialogOpen(true)}
+              >
+                Criar Manual
+              </Button>
+              <Button 
+                className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 h-12 font-bold shadow-lg"
+                onClick={() => setIsDialogOpen(true)}
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Usar AI Planner
+              </Button>
+            </div>
           </div>
         )}
       </main>

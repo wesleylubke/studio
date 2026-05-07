@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -25,7 +24,6 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
   const [isAIPlanning, setIsAIPlanning] = useState(false);
   const { toast } = useToast();
 
-  // Robust safety net for Radix UI pointer-events lock
   useEffect(() => {
     if (!open) {
       const timer = setTimeout(() => {
@@ -55,7 +53,7 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
     if (!description.trim() || description.length < 10) {
       toast({
         title: "Mais detalhes necessários",
-        description: "Por favor, forneça uma descrição mais detalhada para que a IA possa sugerir tarefas relevantes.",
+        description: "Descreva o projeto detalhadamente para que a IA possa gerar tarefas precisas.",
         variant: "destructive"
       });
       return;
@@ -67,16 +65,16 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
       if (result && result.tasks) {
         onSubmit({ name, description, tasks: result.tasks });
         toast({
-          title: "Sugestão concluída!",
-          description: `${result.tasks.length} tarefas foram geradas com sucesso.`,
+          title: "Inteligência Artificial Ativada!",
+          description: `Roadmap sugerido com ${result.tasks.length} tarefas estratégicas.`,
         });
         reset();
       }
     } catch (error: any) {
       console.error("AI Planning Error:", error);
       toast({
-        title: "Erro no Assistente de IA",
-        description: error.message || "Não foi possível gerar as tarefas. Verifique se a chave da API está configurada.",
+        title: "Erro no Assistente",
+        description: "Não foi possível conectar com a IA. Verifique sua chave de API.",
         variant: "destructive"
       });
     } finally {
@@ -94,69 +92,69 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-headline font-bold">
+      <DialogContent className="sm:max-w-[480px] rounded-3xl p-8">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-2xl font-black">
             {initialProject ? 'Editar Projeto' : 'Lançar Novo Projeto'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-base">
             {initialProject 
-              ? 'Atualize os detalhes do seu projeto abaixo.' 
-              : 'Defina a visão do seu projeto. Use a IA para gerar um cronograma automaticamente.'}
+              ? 'Mantenha os detalhes do seu projeto atualizados.' 
+              : 'Defina a visão do projeto e deixe nossa IA estruturar os primeiros passos.'}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
+        <div className="grid gap-6 py-2">
           <div className="grid gap-2">
-            <Label htmlFor="name" className="text-sm font-semibold">Nome do Projeto</Label>
+            <Label htmlFor="name" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Nome do Projeto</Label>
             <Input 
               id="name" 
-              placeholder="Ex: Campanha de Marketing Q4" 
+              placeholder="Ex: Campanha de Marketing Digital" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-background"
+              className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-base"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description" className="text-sm font-semibold">Descrição</Label>
+            <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Descrição Estratégica</Label>
             <Textarea 
               id="description" 
-              placeholder="O que estamos construindo? Descreva para que a IA possa ajudar." 
+              placeholder="Descreva os objetivos, público e entregáveis do projeto..." 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="h-24 bg-background"
+              className="h-32 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-base resize-none"
             />
           </div>
         </div>
-        <DialogFooter className="flex-col sm:flex-row gap-2">
+        <DialogFooter className="flex-col sm:flex-row gap-3 mt-8">
           {!initialProject && (
             <Button 
               variant="outline" 
               onClick={handleAIPlan} 
               disabled={isAIPlanning || !name || !description}
-              className="flex-1 border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              className="flex-1 h-12 rounded-full border-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground font-bold shadow-lg"
             >
               {isAIPlanning ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               ) : (
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-5 h-5 mr-2" />
               )}
-              Assistente de IA
+              AI Planner
             </Button>
           )}
           <Button 
-            className="flex-1 bg-primary hover:bg-primary/90" 
+            className="flex-1 h-12 rounded-full bg-primary hover:bg-primary/90 font-bold shadow-lg" 
             onClick={handleCreate}
             disabled={!name}
           >
             {initialProject ? (
               <>
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Alterações
+                <Save className="w-5 h-5 mr-2" />
+                Salvar
               </>
             ) : (
               <>
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Criar Manualmente
+                <PlusCircle className="w-5 h-5 mr-2" />
+                Criar Projeto
               </>
             )}
           </Button>
