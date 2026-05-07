@@ -9,7 +9,7 @@ import { Plus, LayoutTemplate, Sparkles, Loader2, ArrowRight } from 'lucide-reac
 import { format, addDays } from 'date-fns';
 import { useUser, useFirestore, useAuth, useCollection, useMemoFirebase, initiateGoogleSignIn } from '@/firebase';
 import { collection, doc, query, where } from 'firebase/firestore';
-import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { addDocumentNonBlocking } from '@/firebase';
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
@@ -71,11 +71,6 @@ export default function Home() {
         });
       });
     }
-  };
-
-  const handleDeleteProject = (projectId: string) => {
-    if (!db) return;
-    deleteDocumentNonBlocking(doc(db, 'projects', projectId));
   };
 
   if (isUserLoading || (user && isProjectsLoading)) {
@@ -155,7 +150,6 @@ export default function Home() {
               <ProjectCard 
                 key={project.id} 
                 project={project} 
-                onDelete={handleDeleteProject}
               />
             ))}
           </div>

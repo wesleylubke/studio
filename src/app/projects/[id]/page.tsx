@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
@@ -10,7 +9,6 @@ import ProjectDialog from '@/components/projects/ProjectDialog';
 import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { 
-  ArrowLeft, 
   Plus, 
   Trash2, 
   ChevronRight, 
@@ -23,8 +21,6 @@ import {
   Share2,
   Loader2,
   UserPlus,
-  User,
-  Settings,
   ChevronUp,
   ChevronDown,
   Target
@@ -41,7 +37,7 @@ import {
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc, arrayUnion, query, orderBy } from 'firebase/firestore';
 import { updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -129,6 +125,12 @@ export default function ProjectPage() {
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    if (!db) return;
+    deleteDocumentNonBlocking(doc(db, 'projects', projectId));
+    router.push('/');
   };
 
   if (isUserLoading || (user && (isProjectLoading || isTasksLoading))) {
@@ -368,6 +370,7 @@ export default function ProjectPage() {
           updateDocumentNonBlocking(doc(db, 'projects', id), data);
           setIsProjectDialogOpen(false);
         }}
+        onDelete={handleDeleteProject}
         initialProject={project as any}
       />
 

@@ -1,27 +1,14 @@
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2, Users, Clock } from 'lucide-react';
+import { Users, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 
 interface ProjectCardProps {
   project: any;
-  onDelete: (id: string) => void;
 }
 
-export default function ProjectCard({ project, onDelete }: ProjectCardProps) {
+export default function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter();
   const memberCount = project.members?.length || 0;
 
@@ -39,38 +26,6 @@ export default function ProjectCard({ project, onDelete }: ProjectCardProps) {
           <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors truncate">
             {project.name}
           </CardTitle>
-          
-          <div onClick={(e) => e.stopPropagation()}>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0 hover:bg-destructive/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="rounded-2xl border-2">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-xl font-bold">Você tem certeza?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-base">
-                    Esta ação não pode ser desfeita. Isso excluirá permanentemente o projeto
-                    <span className="font-bold text-foreground"> "{project.name}"</span> e todas as tarefas associadas.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="mt-4">
-                  <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => onDelete(project.id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full"
-                  >
-                    Confirmar Exclusão
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
         </div>
         
         <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10 mb-6 opacity-80">

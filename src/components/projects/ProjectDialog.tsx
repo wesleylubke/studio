@@ -6,19 +6,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Sparkles, Loader2, Save } from 'lucide-react';
+import { PlusCircle, Sparkles, Loader2, Save, Trash2 } from 'lucide-react';
 import { suggestProjectTasks } from '@/ai/flows/suggest-project-tasks';
 import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (project: { name: string; description: string; tasks?: any[] }) => void;
+  onDelete?: (id: string) => void;
   initialProject?: Project;
 }
 
-export default function ProjectDialog({ open, onOpenChange, onSubmit, initialProject }: ProjectDialogProps) {
+export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, initialProject }: ProjectDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isAIPlanning, setIsAIPlanning] = useState(false);
@@ -94,10 +106,10 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px] rounded-3xl p-8">
         <DialogHeader className="mb-4">
-          <DialogTitle className="text-2xl font-black">
+          <DialogTitle className="text-2xl font-black text-left">
             {initialProject ? 'Editar Projeto' : 'Lançar Novo Projeto'}
           </DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogDescription className="text-base text-left">
             {initialProject 
               ? 'Mantenha os detalhes do seu projeto atualizados.' 
               : 'Defina a visão do projeto e deixe nossa IA estruturar os primeiros passos.'}
@@ -126,6 +138,33 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, initialPro
           </div>
         </div>
         <DialogFooter className="flex-col sm:flex-row gap-3 mt-8">
+          {initialProject && onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="flex-1 h-12 rounded-full border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-bold">
+                  <Trash2 className="w-5 h-5 mr-2" />
+                  Excluir
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl border-2">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-xl font-bold">Você tem certeza?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-base">
+                    Esta ação não pode ser desfeita. Isso excluirá permanentemente o projeto e todas as suas tarefas.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-4">
+                  <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => onDelete(initialProject.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full"
+                  >
+                    Confirmar Exclusão
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           {!initialProject && (
             <Button 
               variant="outline" 
