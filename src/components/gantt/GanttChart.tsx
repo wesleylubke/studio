@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo, useRef, useEffect, useState } from 'react';
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown, Calendar, Clock } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
 
 interface GanttChartProps {
   tasks: Task[];
@@ -239,11 +238,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
 
                 {/* Bars Area */}
                 <div className="relative gantt-grid" style={{ width: dateRange.length * DAY_WIDTH }}>
-                  {/* Today Indicator Line */}
-                  <div className="today-line" style={{ left: todayOffset }} />
-                  
                   <TooltipProvider>
-                    <Tooltip>
+                    <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
                         <div 
                           className={cn(
@@ -271,7 +267,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                           </div>
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="p-5 bg-card/95 backdrop-blur-xl border-2 rounded-2xl shadow-2xl max-w-xs z-[60]">
+                      <TooltipContent side="top" sideOffset={4} className="p-5 bg-card/95 backdrop-blur-xl border-2 rounded-2xl shadow-2xl max-w-xs z-[60]">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between gap-4">
                             <h4 className="font-black text-sm leading-tight text-primary uppercase tracking-tight">{task.name}</h4>
