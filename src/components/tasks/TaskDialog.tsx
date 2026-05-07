@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Task } from '@/types';
 import { format } from 'date-fns';
-import { Users } from 'lucide-react';
+import { Users, Calendar as CalendarIcon, FileText } from 'lucide-react';
 
 interface TaskDialogProps {
   open: boolean;
@@ -29,7 +29,6 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   const [progress, setProgress] = useState(0);
   const [assigneeEmails, setAssigneeEmails] = useState<string[]>([]);
 
-  // Safety net for Radix UI pointer-events lock
   useEffect(() => {
     if (!open) {
       const timer = setTimeout(() => {
@@ -89,104 +88,114 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-headline font-bold">
-            {initialTask ? 'Edit Task' : 'Add New Task'}
+      <DialogContent className="w-[95%] sm:max-w-[425px] rounded-2xl sm:rounded-3xl p-6 sm:p-8 overflow-y-auto max-h-[90vh]">
+        <DialogHeader className="mb-2">
+          <DialogTitle className="text-xl sm:text-2xl font-black text-left">
+            {initialTask ? 'Editar Tarefa' : 'Nova Tarefa'}
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="task-name" className="text-sm font-semibold">Task Name</Label>
+        <div className="grid gap-5 py-2">
+          <div className="grid gap-1.5">
+            <Label htmlFor="task-name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nome da Tarefa</Label>
             <Input 
               id="task-name" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Review project requirements"
-              className="bg-background"
+              placeholder="Ex: Definir arquitetura do app"
+              className="h-10 sm:h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-sm"
             />
           </div>
           
-          <div className="grid gap-2">
-            <Label className="text-sm font-semibold flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Assignees
+          <div className="grid gap-1.5">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Users className="w-3 h-3" />
+              Responsáveis
             </Label>
-            <ScrollArea className="h-[140px] rounded-md border p-2 bg-background/50">
-              <div className="space-y-2">
+            <ScrollArea className="h-[120px] sm:h-[140px] rounded-xl border-none bg-muted/30 p-2">
+              <div className="space-y-1">
                 {projectMembers.map((member) => (
-                  <div key={member} className="flex items-center space-x-2 p-1.5 hover:bg-muted/50 rounded transition-colors">
+                  <div 
+                    key={member} 
+                    className="flex items-center space-x-2 p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                    onClick={() => toggleAssignee(member)}
+                  >
                     <Checkbox 
                       id={`member-${member}`} 
                       checked={assigneeEmails.includes(member)}
                       onCheckedChange={() => toggleAssignee(member)}
+                      className="rounded"
                     />
-                    <label 
-                      htmlFor={`member-${member}`}
-                      className="text-xs font-medium leading-none cursor-pointer flex flex-col gap-0.5"
-                    >
-                      <span>{getFriendlyName(member)}</span>
-                      <span className="text-[10px] text-muted-foreground font-normal">{member}</span>
-                    </label>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold leading-none truncate">{getFriendlyName(member)}</span>
+                      <span className="text-[9px] text-muted-foreground truncate">{member}</span>
+                    </div>
                   </div>
                 ))}
                 {projectMembers.length === 0 && (
-                  <p className="text-[10px] text-muted-foreground italic p-2 text-center">No members available</p>
+                  <p className="text-[10px] text-muted-foreground italic p-4 text-center">Nenhum membro disponível</p>
                 )}
               </div>
             </ScrollArea>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="start-date" className="text-sm font-semibold">Start Date</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="start-date" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                <CalendarIcon className="w-3 h-3" /> Início
+              </Label>
               <Input 
                 id="start-date" 
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-background"
+                className="h-10 sm:h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-xs"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="end-date" className="text-sm font-semibold">End Date</Label>
+            <div className="grid gap-1.5">
+              <Label htmlFor="end-date" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                <CalendarIcon className="w-3 h-3" /> Fim
+              </Label>
               <Input 
                 id="end-date" 
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-background"
+                className="h-10 sm:h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-xs"
               />
             </div>
           </div>
-          <div className="grid gap-4">
+
+          <div className="grid gap-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">Progress Percentage</Label>
-              <span className="text-sm font-bold text-primary">{progress}%</span>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Progresso</Label>
+              <span className="text-sm font-black text-primary">{progress}%</span>
             </div>
             <Slider 
               value={[progress]} 
               max={100} 
               step={1} 
               onValueChange={(val) => setProgress(val[0])}
-              className="py-2"
+              className="py-1"
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="task-desc" className="text-sm font-semibold">Notes (Optional)</Label>
+
+          <div className="grid gap-1.5">
+            <Label htmlFor="task-desc" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+              <FileText className="w-3 h-3" /> Notas
+            </Label>
             <Input 
               id="task-desc" 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Additional details..."
-              className="bg-background"
+              placeholder="Detalhes adicionais..."
+              className="h-10 sm:h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-sm"
             />
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="bg-primary" onClick={handleSubmit}>
-            {initialTask ? 'Save Changes' : 'Create Task'}
+        <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row gap-2">
+          <Button variant="outline" className="rounded-full h-10 sm:h-12 font-bold px-6" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button className="bg-primary rounded-full h-10 sm:h-12 font-bold px-8 shadow-xl" onClick={handleSubmit}>
+            {initialTask ? 'Salvar Alterações' : 'Criar Tarefa'}
           </Button>
         </DialogFooter>
       </DialogContent>
