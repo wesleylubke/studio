@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useRef, useEffect, useState } from 'react';
@@ -25,10 +26,19 @@ interface GanttChartProps {
 
 const DAY_WIDTH = 40;
 
+/**
+ * Parses YYYY-MM-DD string into a local Date object to avoid timezone shifts.
+ */
+const parseLocalDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask }: GanttChartProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Estado para controle de arraste
+  // Mouse drag-to-scroll state
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -45,17 +55,24 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
       };
     }
 
-    const taskDates = tasks.flatMap(t => [new Date(t.startDate), new Date(t.endDate)]);
-    const startDate = startOfDay(addDays(min([...taskDates, today]), -7));
-    const endDate = startOfDay(addDays(max([...taskDates, today]), 14));
+    // Process tasks with consistent local parsing
+    const taskDates = tasks.flatMap(t => [parseLocalDate(t.startDate), parseLocalDate(t.endDate)]);
+    const minDate = min([...taskDates, today]);
+    const maxDate = max([...taskDates, today]);
+
+    // Extend range slightly for padding
+    const startDate = startOfDay(addDays(minDate, -7));
+    const endDate = startOfDay(addDays(maxDate, 14));
     
     const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
     const todayOffset = differenceInDays(today, startDate) * DAY_WIDTH;
 
     const chartData = tasks.map(task => {
-      const taskStart = startOfDay(new Date(task.startDate));
-      const taskEnd = startOfDay(new Date(task.endDate));
+      const taskStart = startOfDay(parseLocalDate(task.startDate));
+      const taskEnd = startOfDay(parseLocalDate(task.endDate));
+      
       const startOffset = differenceInDays(taskStart, startDate) * DAY_WIDTH;
+      // Duration includes the end day, so we add 1
       const duration = (differenceInDays(taskEnd, taskStart) + 1) * DAY_WIDTH;
 
       return {
@@ -77,7 +94,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
     
-    // Não inicia arraste se clicar em botões ou elementos interativos
+    // Don't start drag if clicking interactive elements
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('.dropdown-trigger')) return;
 
     setIsDragging(true);
@@ -97,7 +114,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
     if (!isDragging || !scrollContainerRef.current) return;
     e.preventDefault();
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Multiplicador para sensibilidade
+    const walk = (x - startX) * 1.5;
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
   };
 
@@ -123,7 +140,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
         onMouseMove={handleMouseMove}
       >
         <div className="inline-flex flex-col min-w-full min-h-full">
-          {/* Timeline Header */}
+          {/* Unified Sticky Header */}
           <div className="flex sticky top-0 z-30 border-b bg-card/95 backdrop-blur-md">
             <div className="w-32 sm:w-64 flex-shrink-0 border-r p-6 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
               Estrutura de Tarefas
@@ -162,13 +179,13 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
             </div>
           </div>
 
-          {/* Grid Content */}
+          {/* Grid Content with unified dividers */}
           <div className="flex flex-col divide-y divide-white/5 bg-card/50">
             {chartData.map((task, index) => (
               <div key={task.id} className="flex h-16 hover:bg-primary/5 transition-colors group">
-                {/* Task Label Sidebar */}
-                <div className="w-32 sm:w-64 flex-shrink-0 border-r px-4 flex items-center gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-xl">
-                  <div className="flex flex-col opacity-20 group-hover:opacity-100 transition-opacity">
+                {/* Task Label Sidebar - Sticky */}
+                <div className="w-32 sm:w-64 flex-shrink-0 border-r px-4 flex items-center gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-sm">
+                  <div className="flex flex-col opacity-60 group-hover:opacity-100 transition-opacity">
                      <Button 
                        variant="ghost" 
                        size="icon" 
@@ -209,7 +226,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild className="dropdown-trigger">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 opacity-40 group-hover:opacity-100 transition-opacity rounded-xl">
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -243,7 +260,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                       <TooltipTrigger asChild>
                         <div 
                           className={cn(
-                            "absolute top-4 h-8 rounded-xl shadow-xl transition-all hover:scale-[1.02] hover:brightness-110 cursor-pointer overflow-hidden border border-white/10 group/bar",
+                            "absolute top-4 h-8 rounded-xl shadow-xl transition-all hover:scale-[1.01] hover:brightness-110 cursor-pointer overflow-hidden border border-white/10 group/bar",
                             task.progress === 100 ? "ring-1 ring-accent/30" : "ring-1 ring-primary/30"
                           )}
                           style={{ 
@@ -267,33 +284,29 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                           </div>
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="top" sideOffset={4} className="p-5 bg-card/95 backdrop-blur-xl border-2 rounded-2xl shadow-2xl max-w-xs z-[60]">
-                        <div className="space-y-4">
+                      <TooltipContent side="top" sideOffset={2} className="p-4 bg-card/95 backdrop-blur-xl border-2 rounded-2xl shadow-2xl max-w-xs z-[60]">
+                        <div className="space-y-3">
                           <div className="flex items-center justify-between gap-4">
-                            <h4 className="font-black text-sm leading-tight text-primary uppercase tracking-tight">{task.name}</h4>
-                            <Badge className={cn("border-none px-3 py-1 font-black", task.progress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary")}>
+                            <h4 className="font-black text-sm text-primary uppercase tracking-tight">{task.name}</h4>
+                            <Badge className={cn("border-none px-2 py-0.5 font-black text-[9px]", task.progress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary")}>
                               {task.progress}%
                             </Badge>
                           </div>
                           
                           {task.description && (
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 bg-muted/30 p-2 rounded-lg">{task.description}</p>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed bg-muted/30 p-2 rounded-lg">{task.description}</p>
                           )}
 
-                          <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                            <Calendar className="w-3.5 h-3.5 text-primary" />
-                            <span>{format(new Date(task.startDate), 'dd MMM')} — {format(new Date(task.endDate), 'dd MMM')}</span>
+                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                            <Calendar className="w-3 h-3 text-primary" />
+                            <span>{format(parseLocalDate(task.startDate), 'dd MMM')} — {format(parseLocalDate(task.endDate), 'dd MMM')}</span>
                           </div>
 
                           {task.assigneeEmails && task.assigneeEmails.length > 0 && (
-                            <div className="pt-3 border-t border-white/10">
-                               <div className="flex items-center gap-2 mb-2 text-[9px] font-black text-primary uppercase tracking-[0.1em]">
-                                 <Users className="w-3.5 h-3.5" />
-                                 <span>Responsáveis</span>
-                               </div>
-                               <div className="flex flex-wrap gap-1.5">
+                            <div className="pt-2 border-t border-white/5">
+                               <div className="flex flex-wrap gap-1">
                                  {task.assigneeEmails.map(email => (
-                                   <Badge key={email} variant="secondary" className="text-[9px] px-2 py-0.5 capitalize bg-primary/10 text-primary border-none font-bold">
+                                   <Badge key={email} variant="secondary" className="text-[8px] px-1.5 py-0 bg-primary/10 text-primary border-none font-bold">
                                      {getFriendlyName(email)}
                                    </Badge>
                                  ))}
