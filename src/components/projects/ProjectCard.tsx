@@ -48,7 +48,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <TooltipTrigger asChild>
                 <Badge 
                   variant="secondary" 
-                  className="gap-1.5 py-1 px-3 bg-primary/10 text-primary border-none text-[10px] font-bold uppercase tracking-wider cursor-help"
+                  className="gap-1.5 py-1 px-3 bg-primary/10 text-primary border-none text-[10px] font-bold uppercase tracking-wider"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Users className="w-3 h-3" />
