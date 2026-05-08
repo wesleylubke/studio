@@ -62,7 +62,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors truncate">
             {project.name}
           </CardTitle>
-          
+        </div>
+        
+        <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10 mb-6 opacity-80">
+          {project.description || "Sem descrição definida para este projeto."}
+        </CardDescription>
+        
+        <div className="flex flex-wrap items-center gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button 
@@ -77,7 +83,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 <ChevronDown className="w-3 h-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-xl p-1 min-w-[150px] z-50" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuContent align="start" className="rounded-xl p-1 min-w-[150px] z-50" onClick={(e) => e.stopPropagation()}>
               {(Object.keys(statusMap) as ProjectStatus[]).map((statusKey) => (
                 <DropdownMenuItem 
                   key={statusKey} 
@@ -94,13 +100,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-        
-        <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10 mb-6 opacity-80">
-          {project.description || "Sem descrição definida para este projeto."}
-        </CardDescription>
-        
-        <div className="flex items-center gap-3">
+
           <TooltipProvider>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
