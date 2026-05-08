@@ -42,6 +42,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+// Helper for consistent local date parsing (avoids UTC shift)
+const parseLocalDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -306,9 +313,9 @@ export default function ProjectPage() {
                           </td>
                           <td className="px-4 sm:px-8 py-4 sm:py-5">
                             <div className="text-[10px] sm:text-xs font-bold whitespace-nowrap">
-                              <span className="text-muted-foreground">{format(new Date(task.startDate), 'dd MMM')}</span>
+                              <span className="text-muted-foreground">{format(parseLocalDate(task.startDate), 'dd MMM')}</span>
                               <span className="mx-1 sm:mx-2 text-primary opacity-50">—</span>
-                              <span className="text-muted-foreground">{format(new Date(task.endDate), 'dd MMM')}</span>
+                              <span className="text-muted-foreground">{format(parseLocalDate(task.endDate), 'dd MMM')}</span>
                             </div>
                           </td>
                           <td className="px-4 sm:px-8 py-4 sm:py-5">
