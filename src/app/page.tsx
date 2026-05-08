@@ -13,6 +13,7 @@ import { collection, query, where } from 'firebase/firestore';
 import { addDocumentNonBlocking } from '@/firebase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectStatus } from '@/types';
+import { Badge } from '@/components/ui/badge';
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
@@ -28,6 +29,15 @@ export default function Home() {
   }, [db, user]);
 
   const { data: projects, isLoading: isProjectsLoading } = useCollection(projectsQuery);
+
+  const counts = useMemo(() => {
+    if (!projects) return { ongoing: 0, paused: 0, finished: 0 };
+    return {
+      ongoing: projects.filter(p => (p.status || 'ongoing') === 'ongoing').length,
+      paused: projects.filter(p => p.status === 'paused').length,
+      finished: projects.filter(p => p.status === 'finished').length,
+    };
+  }, [projects]);
 
   const filteredProjects = useMemo(() => {
     if (!projects) return [];
@@ -156,15 +166,24 @@ export default function Home() {
 
         <Tabs defaultValue="ongoing" className="w-full mb-12" onValueChange={(val) => setActiveTab(val as ProjectStatus)}>
           <div className="flex justify-center mb-8">
-            <TabsList className="bg-card/50 border h-14 p-1 rounded-full shadow-lg">
-              <TabsTrigger value="ongoing" className="rounded-full px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsList className="bg-card/50 border h-auto p-1 rounded-full shadow-lg flex-wrap justify-center sm:flex-nowrap">
+              <TabsTrigger value="ongoing" className="rounded-full px-6 py-2 sm:px-8 sm:py-3 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
                 Em Andamento
+                <Badge variant={activeTab === 'ongoing' ? 'secondary' : 'outline'} className="rounded-full px-2 py-0 min-w-[1.5rem] flex justify-center border-none bg-primary/20 text-[10px]">
+                  {counts.ongoing}
+                </Badge>
               </TabsTrigger>
-              <TabsTrigger value="paused" className="rounded-full px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="paused" className="rounded-full px-6 py-2 sm:px-8 sm:py-3 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
                 Pausados
+                <Badge variant={activeTab === 'paused' ? 'secondary' : 'outline'} className="rounded-full px-2 py-0 min-w-[1.5rem] flex justify-center border-none bg-primary/20 text-[10px]">
+                  {counts.paused}
+                </Badge>
               </TabsTrigger>
-              <TabsTrigger value="finished" className="rounded-full px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="finished" className="rounded-full px-6 py-2 sm:px-8 sm:py-3 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
                 Finalizados
+                <Badge variant={activeTab === 'finished' ? 'secondary' : 'outline'} className="rounded-full px-2 py-0 min-w-[1.5rem] flex justify-center border-none bg-primary/20 text-[10px]">
+                  {counts.finished}
+                </Badge>
               </TabsTrigger>
             </TabsList>
           </div>
