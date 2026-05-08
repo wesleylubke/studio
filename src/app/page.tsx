@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectDialog from '@/components/projects/ProjectDialog';
@@ -8,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate, Sparkles, Loader2, ArrowRight } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { useUser, useFirestore, useAuth, useCollection, useMemoFirebase, initiateGoogleSignIn } from '@/firebase';
-import { collection, doc, query, where } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { addDocumentNonBlocking } from '@/firebase';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProjectStatus } from '@/types';
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
@@ -17,6 +20,7 @@ export default function Home() {
   const db = useFirestore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<ProjectStatus>('ongoing');
 
   const projectsQuery = useMemoFirebase(() => {
     if (!db || !user || !user.email) return null;
@@ -24,6 +28,11 @@ export default function Home() {
   }, [db, user]);
 
   const { data: projects, isLoading: isProjectsLoading } = useCollection(projectsQuery);
+
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+    return projects.filter(p => (p.status || 'ongoing') === activeTab);
+  }, [projects, activeTab]);
 
   const handleLogin = async () => {
     setIsLoginLoading(true);
@@ -36,13 +45,14 @@ export default function Home() {
     }
   };
 
-  const handleCreateProject = async ({ name, description, tasks: aiTasks }: { name: string; description: string; tasks?: any[] }) => {
+  const handleCreateProject = async (data: { name: string; description: string; status?: ProjectStatus; tasks?: any[] }) => {
     if (!user || !db) return;
 
     const projectsRef = collection(db, 'projects');
     const projectData = {
-      name,
-      description,
+      name: data.name,
+      description: data.description,
+      status: data.status || 'ongoing',
       ownerId: user.uid,
       ownerEmail: user.email,
       members: [user.email],
@@ -52,10 +62,10 @@ export default function Home() {
     const projectRefPromise = addDocumentNonBlocking(projectsRef, projectData);
     const projectRef = await projectRefPromise;
 
-    if (aiTasks && aiTasks.length > 0 && projectRef) {
+    if (data.tasks && data.tasks.length > 0 && projectRef) {
       const tasksRef = collection(db, 'projects', projectRef.id, 'tasks');
       let currentStartDate = new Date();
-      aiTasks.forEach((task, index) => {
+      data.tasks.forEach((task, index) => {
         const start = addDays(currentStartDate, index * 2);
         const end = addDays(start, 3);
         
@@ -131,7 +141,7 @@ export default function Home() {
             </h1>
             <p className="text-lg text-muted-foreground">
               {projects && projects.length > 0 
-                ? `Você tem ${projects.length} projeto(s) ativos no momento.`
+                ? `Você tem ${projects.length} projeto(s) no total.`
                 : "Comece criando um novo projeto para gerenciar seus fluxos."}
             </p>
           </div>
@@ -144,44 +154,48 @@ export default function Home() {
           </Button>
         </div>
 
-        {projects && projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map(project => (
-              <ProjectCard 
-                key={project.id} 
-                project={project} 
-              />
-            ))}
+        <Tabs defaultValue="ongoing" className="w-full mb-12" onValueChange={(val) => setActiveTab(val as ProjectStatus)}>
+          <div className="flex justify-center mb-8">
+            <TabsList className="bg-card/50 border h-14 p-1 rounded-full shadow-lg">
+              <TabsTrigger value="ongoing" className="rounded-full px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Em Andamento
+              </TabsTrigger>
+              <TabsTrigger value="paused" className="rounded-full px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Pausados
+              </TabsTrigger>
+              <TabsTrigger value="finished" className="rounded-full px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Finalizados
+              </TabsTrigger>
+            </TabsList>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-24 sm:py-32 border-2 border-dashed border-muted/50 rounded-3xl bg-muted/5 space-y-8 text-center px-6">
-            <div className="bg-muted p-8 rounded-full shadow-inner">
-              <LayoutTemplate className="w-16 h-16 text-muted-foreground opacity-40" />
-            </div>
-            <div className="space-y-4 max-w-md">
-              <h3 className="text-3xl font-bold">Nenhum projeto ainda</h3>
-              <p className="text-lg text-muted-foreground">
-                Que tal deixar nossa IA planejar seu primeiro roadmap? Ou comece do zero manualmente.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-              <Button 
-                variant="outline"
-                className="rounded-full px-8 h-12 border-primary text-primary hover:bg-primary/10 font-bold"
-                onClick={() => setIsDialogOpen(true)}
-              >
-                Criar Manual
-              </Button>
-              <Button 
-                className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 h-12 font-bold shadow-lg"
-                onClick={() => setIsDialogOpen(true)}
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Usar AI Planner
-              </Button>
-            </div>
-          </div>
-        )}
+
+          <TabsContent value={activeTab} className="focus-visible:ring-0">
+            {filteredProjects.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-500">
+                {filteredProjects.map(project => (
+                  <ProjectCard 
+                    key={project.id} 
+                    project={project} 
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-muted/50 rounded-3xl bg-muted/5 space-y-6 text-center px-6">
+                <LayoutTemplate className="w-16 h-16 text-muted-foreground opacity-20" />
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold">Nenhum projeto aqui</h3>
+                  <p className="text-muted-foreground">
+                    {activeTab === 'ongoing' 
+                      ? "Você não tem projetos ativos no momento."
+                      : activeTab === 'paused'
+                      ? "Não há projetos pausados para exibição."
+                      : "Sua lista de projetos finalizados está vazia."}
+                  </p>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
 
       <ProjectDialog 

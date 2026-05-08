@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Sparkles, Loader2, Save, Trash2 } from 'lucide-react';
 import { suggestProjectTasks } from '@/ai/flows/suggest-project-tasks';
 import { useToast } from '@/hooks/use-toast';
-import { Project } from '@/types';
+import { Project, ProjectStatus } from '@/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +27,7 @@ import {
 interface ProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (project: { name: string; description: string; tasks?: any[] }) => void;
+  onSubmit: (project: { name: string; description: string; status: ProjectStatus; tasks?: any[] }) => void;
   onDelete?: (id: string) => void;
   initialProject?: Project;
 }
@@ -33,6 +35,7 @@ interface ProjectDialogProps {
 export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, initialProject }: ProjectDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [status, setStatus] = useState<ProjectStatus>('ongoing');
   const [isAIPlanning, setIsAIPlanning] = useState(false);
   const { toast } = useToast();
 
@@ -49,15 +52,17 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, 
     if (initialProject) {
       setName(initialProject.name);
       setDescription(initialProject.description);
+      setStatus(initialProject.status || 'ongoing');
     } else {
       setName('');
       setDescription('');
+      setStatus('ongoing');
     }
   }, [initialProject, open]);
 
   const handleCreate = async () => {
     if (!name.trim()) return;
-    onSubmit({ name, description });
+    onSubmit({ name, description, status });
     reset();
   };
 
@@ -75,7 +80,7 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, 
     try {
       const result = await suggestProjectTasks({ projectDescription: description });
       if (result && result.tasks) {
-        onSubmit({ name, description, tasks: result.tasks });
+        onSubmit({ name, description, status, tasks: result.tasks });
         toast({
           title: "Inteligência Artificial Ativada!",
           description: `Roadmap sugerido com ${result.tasks.length} tarefas estratégicas.`,
@@ -98,6 +103,7 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, 
     if (!initialProject) {
       setName('');
       setDescription('');
+      setStatus('ongoing');
     }
     onOpenChange(false);
   };
@@ -125,6 +131,19 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, 
               onChange={(e) => setName(e.target.value)}
               className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary text-base"
             />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="status" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Status do Projeto</Label>
+            <Select value={status} onValueChange={(val) => setStatus(val as ProjectStatus)}>
+              <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-none focus:ring-primary">
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="ongoing">Em Andamento</SelectItem>
+                <SelectItem value="paused">Pausado</SelectItem>
+                <SelectItem value="finished">Finalizado</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Descrição Estratégica</Label>

@@ -1,8 +1,11 @@
 
+export type ProjectStatus = 'ongoing' | 'paused' | 'finished';
+
 export interface Project {
   id: string;
   name: string;
   description: string;
+  status: ProjectStatus;
   ownerId: string;
   ownerEmail: string;
   members: string[];

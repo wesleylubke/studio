@@ -48,6 +48,15 @@
           "type": "string",
           "description": "A detailed description."
         },
+        "status": {
+          "type": "string",
+          "description": "The current status of the project.",
+          "enum": [
+            "ongoing",
+            "paused",
+            "finished"
+          ]
+        },
         "ownerId": {
           "type": "string",
           "description": "The UID of the owner."
@@ -73,7 +82,8 @@
         "name",
         "ownerId",
         "ownerEmail",
-        "members"
+        "members",
+        "status"
       ]
     },
     "Task": {
