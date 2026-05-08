@@ -42,7 +42,7 @@ export default function ProjectDialog({ open, onOpenChange, onSubmit, onDelete, 
   useEffect(() => {
     if (!open) {
       const timer = setTimeout(() => {
-        document.body.style.pointerEvents = 'auto';
+        document.body.style.pointerEvents = '';
       }, 500);
       return () => clearTimeout(timer);
     }

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
@@ -119,11 +119,7 @@ export default function ProjectPage() {
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
-      const timer = setTimeout(() => {
-        setEditingTask(null);
-        document.body.style.pointerEvents = 'auto';
-      }, 300);
-      return () => clearTimeout(timer);
+      setTimeout(() => setEditingTask(null), 300);
     }
   };
 

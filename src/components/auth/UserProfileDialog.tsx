@@ -29,6 +29,15 @@ export default function UserProfileDialog({ open, onOpenChange, user }: UserProf
     }
   }, [open, user]);
 
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   const handleSave = async () => {
     if (!displayName.trim()) return;
     setIsLoading(true);
