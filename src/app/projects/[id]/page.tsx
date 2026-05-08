@@ -199,20 +199,20 @@ export default function ProjectPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-4 gap-2 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
             { label: 'Concluídas', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-2xl p-4 sm:p-6 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg">
-              <div className={cn("p-3 sm:p-4 rounded-2xl", stat.bg)}>
-                <stat.icon className={cn("w-6 h-6 sm:w-7 sm:h-7", stat.color)} />
+            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left">
+              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl", stat.bg)}>
+                <stat.icon className={cn("w-4 h-4 sm:w-7 sm:h-7", stat.color)} />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">{stat.label}</p>
-                <p className="text-xl sm:text-3xl font-black">{stat.value}</p>
+                <p className="text-[7px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">{stat.label}</p>
+                <p className="text-xs sm:text-3xl font-black leading-tight">{stat.value}</p>
               </div>
             </div>
           ))}
