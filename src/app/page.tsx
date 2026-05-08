@@ -6,7 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectDialog from '@/components/projects/ProjectDialog';
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate, Sparkles, Loader2, ArrowRight } from 'lucide-react';
+import { Plus, LayoutTemplate, Sparkles, Loader2, ArrowRight, Clock, PauseCircle, CheckCircle2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { useUser, useFirestore, useAuth, useCollection, useMemoFirebase, initiateGoogleSignIn } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
@@ -14,6 +14,7 @@ import { addDocumentNonBlocking } from '@/firebase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectStatus } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
@@ -165,28 +166,46 @@ export default function Home() {
         </div>
 
         <Tabs defaultValue="ongoing" className="w-full mb-12" onValueChange={(val) => setActiveTab(val as ProjectStatus)}>
-          <div className="flex justify-center mb-8 overflow-hidden">
-            <TabsList className="bg-card/50 border h-auto p-1 rounded-full shadow-lg flex-nowrap justify-center w-full max-w-2xl sm:w-auto">
-              <TabsTrigger value="ongoing" className="flex-1 sm:flex-none rounded-full px-3 py-2 sm:px-8 sm:py-3 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5 sm:gap-2 text-[10px] sm:text-sm whitespace-nowrap">
-                Em Andamento
-                <Badge variant={activeTab === 'ongoing' ? 'secondary' : 'outline'} className="rounded-full px-1.5 py-0 min-w-[1.2rem] flex justify-center border-none bg-primary/20 text-[9px] sm:text-[10px]">
-                  {counts.ongoing}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="paused" className="flex-1 sm:flex-none rounded-full px-3 py-2 sm:px-8 sm:py-3 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5 sm:gap-2 text-[10px] sm:text-sm whitespace-nowrap">
-                Pausados
-                <Badge variant={activeTab === 'paused' ? 'secondary' : 'outline'} className="rounded-full px-1.5 py-0 min-w-[1.2rem] flex justify-center border-none bg-primary/20 text-[9px] sm:text-[10px]">
-                  {counts.paused}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="finished" className="flex-1 sm:flex-none rounded-full px-3 py-2 sm:px-8 sm:py-3 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5 sm:gap-2 text-[10px] sm:text-sm whitespace-nowrap">
-                Finalizados
-                <Badge variant={activeTab === 'finished' ? 'secondary' : 'outline'} className="rounded-full px-1.5 py-0 min-w-[1.2rem] flex justify-center border-none bg-primary/20 text-[9px] sm:text-[10px]">
-                  {counts.finished}
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <TabsList className="grid grid-cols-3 gap-2 sm:gap-6 bg-transparent h-auto p-0 border-none w-full mb-12">
+            <TabsTrigger 
+              value="ongoing" 
+              className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left data-[state=active]:bg-primary/10 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all duration-300 group"
+            >
+              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-primary/10 group-data-[state=active]:bg-primary/20 transition-colors")}>
+                <Clock className={cn("w-4 h-4 sm:w-7 sm:h-7 text-primary")} />
+              </div>
+              <div>
+                <p className="text-[7px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">Andamento</p>
+                <p className="text-xs sm:text-3xl font-black leading-tight">{counts.ongoing}</p>
+              </div>
+            </TabsTrigger>
+
+            <TabsTrigger 
+              value="paused" 
+              className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left data-[state=active]:bg-muted/50 data-[state=active]:border-muted-foreground/30 data-[state=active]:text-foreground transition-all duration-300 group"
+            >
+              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-muted group-data-[state=active]:bg-muted/80 transition-colors")}>
+                <PauseCircle className={cn("w-4 h-4 sm:w-7 sm:h-7 text-muted-foreground")} />
+              </div>
+              <div>
+                <p className="text-[7px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">Pausados</p>
+                <p className="text-xs sm:text-3xl font-black leading-tight">{counts.paused}</p>
+              </div>
+            </TabsTrigger>
+
+            <TabsTrigger 
+              value="finished" 
+              className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left data-[state=active]:bg-accent/10 data-[state=active]:border-accent data-[state=active]:text-foreground transition-all duration-300 group"
+            >
+              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-accent/10 group-data-[state=active]:bg-accent/20 transition-colors")}>
+                <CheckCircle2 className={cn("w-4 h-4 sm:w-7 sm:h-7 text-accent")} />
+              </div>
+              <div>
+                <p className="text-[7px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">Finalizados</p>
+                <p className="text-xs sm:text-3xl font-black leading-tight">{counts.finished}</p>
+              </div>
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value={activeTab} className="focus-visible:ring-0">
             {filteredProjects.length > 0 ? (
