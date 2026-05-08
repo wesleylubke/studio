@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -181,14 +182,14 @@ export default function ProjectPage() {
             <p className="text-muted-foreground text-sm sm:text-lg max-w-3xl leading-relaxed">{project.description}</p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
-             <Button variant="outline" size="sm" className="flex-1 xl:flex-none rounded-full h-10 sm:h-12 font-bold gap-2 px-4 sm:px-6" onClick={() => setIsShareDialogOpen(true)}>
+          <div className="flex items-center gap-2">
+             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsShareDialogOpen(true)}>
                <Share2 className="w-4 h-4" /> <span className="hidden xs:inline">Compartilhar</span>
              </Button>
-             <Button variant="outline" size="sm" className="flex-1 xl:flex-none rounded-full h-10 sm:h-12 font-bold gap-2 px-4 sm:px-6" onClick={() => setIsProjectDialogOpen(true)}>
+             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsProjectDialogOpen(true)}>
                <Edit2 className="w-4 h-4" /> <span className="hidden xs:inline">Editar</span>
              </Button>
-             <Button size="sm" className="w-full xl:w-auto bg-primary shadow-xl rounded-full h-10 sm:h-12 font-bold gap-2 px-6 sm:px-8 hover:scale-105 transition-transform" onClick={() => {
+             <Button size="sm" className="bg-primary shadow-xl rounded-full h-10 font-bold gap-2 px-5 hover:scale-105 transition-transform" onClick={() => {
                setEditingTask(null);
                setIsTaskDialogOpen(true);
              }}>
