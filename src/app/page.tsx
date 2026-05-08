@@ -156,10 +156,10 @@ export default function Home() {
             </p>
           </div>
           <Button 
-            className="w-full sm:w-auto rounded-full px-10 h-14 shadow-2xl bg-primary hover:bg-primary/90 hover:scale-105 transition-all text-base font-bold"
+            className="w-full sm:w-auto rounded-full px-8 h-12 shadow-xl bg-primary hover:bg-primary/90 hover:scale-105 transition-all text-sm font-bold"
             onClick={() => setIsDialogOpen(true)}
           >
-            <Plus className="w-6 h-6 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Novo Projeto
           </Button>
         </div>
