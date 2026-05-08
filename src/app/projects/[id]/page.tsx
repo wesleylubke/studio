@@ -119,9 +119,22 @@ export default function ProjectPage() {
   const handleTaskDialogChange = (open: boolean) => {
     setIsTaskDialogOpen(open);
     if (!open) {
-      setTimeout(() => setEditingTask(null), 300);
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+        setEditingTask(null);
+      }, 300);
+      return () => clearTimeout(timer);
     }
   };
+
+  useEffect(() => {
+    if (!isShareDialogOpen) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isShareDialogOpen]);
 
   const getFriendlyName = (email: string) => {
     if (!email) return 'Usuário';
@@ -185,23 +198,23 @@ export default function ProjectPage() {
             <p className="text-muted-foreground text-sm sm:text-lg max-w-3xl leading-relaxed">{project.description}</p>
           </div>
           
-          <div className="flex items-center gap-2">
-             <Button size="sm" className="bg-primary shadow-xl rounded-full h-10 font-bold gap-2 px-5 hover:scale-105 transition-transform" onClick={() => {
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+             <Button size="sm" className="flex-1 sm:flex-none bg-primary shadow-xl rounded-full h-10 font-bold gap-2 px-5 hover:scale-105 transition-transform text-xs sm:text-sm" onClick={() => {
                setEditingTask(null);
                setIsTaskDialogOpen(true);
              }}>
-               <Plus className="w-5 h-5" /> Nova Tarefa
+               <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> Nova Tarefa
              </Button>
-             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsProjectDialogOpen(true)}>
-               <Edit2 className="w-4 h-4" /> <span className="hidden xs:inline">Editar</span>
+             <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-full h-10 font-bold gap-2 px-4 text-xs sm:text-sm" onClick={() => setIsProjectDialogOpen(true)}>
+               <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden xs:inline">Editar</span>
              </Button>
-             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsShareDialogOpen(true)}>
-               <Share2 className="w-4 h-4" /> <span className="hidden xs:inline">Compartilhar</span>
+             <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-full h-10 font-bold gap-2 px-4 text-xs sm:text-sm" onClick={() => setIsShareDialogOpen(true)}>
+               <Share2 className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden xs:inline">Compartilhar</span>
              </Button>
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - One line on mobile */}
         <div className="grid grid-cols-4 gap-2 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
@@ -209,13 +222,13 @@ export default function ProjectPage() {
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left">
-              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl", stat.bg)}>
-                <stat.icon className={cn("w-4 h-4 sm:w-7 sm:h-7", stat.color)} />
+            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-1.5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left">
+              <div className={cn("p-1 sm:p-4 rounded-lg sm:rounded-2xl", stat.bg)}>
+                <stat.icon className={cn("w-3.5 h-3.5 sm:w-7 sm:h-7", stat.color)} />
               </div>
-              <div>
-                <p className="text-[7px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">{stat.label}</p>
-                <p className="text-xs sm:text-3xl font-black leading-tight">{stat.value}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[6px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight truncate">{stat.label}</p>
+                <p className="text-[10px] sm:text-3xl font-black leading-tight truncate">{stat.value}</p>
               </div>
             </div>
           ))}
@@ -226,17 +239,17 @@ export default function ProjectPage() {
           <Tabs defaultValue="gantt" className="w-full flex-grow flex flex-col">
             <div className="flex justify-center sm:justify-between items-center mb-6">
                <TabsList className="bg-muted/50 border-2 rounded-full p-1 h-12 sm:h-14 w-full sm:w-auto">
-                <TabsTrigger value="gantt" className="flex-1 sm:flex-none rounded-full px-6 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-xs sm:text-sm">
-                  <GanttIcon className="w-4 h-4 sm:w-5 sm:h-5" /> Gantt
+                <TabsTrigger value="gantt" className="flex-1 sm:flex-none rounded-full px-4 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-[10px] sm:text-sm">
+                  <GanttIcon className="w-3 h-3 sm:w-5 sm:h-5" /> Gantt
                 </TabsTrigger>
-                <TabsTrigger value="list" className="flex-1 sm:flex-none rounded-full px-6 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-xs sm:text-sm">
-                  <LayoutList className="w-4 h-4 sm:w-5 sm:h-5" /> Lista
+                <TabsTrigger value="list" className="flex-1 sm:flex-none rounded-full px-4 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-[10px] sm:text-sm">
+                  <LayoutList className="w-3 h-3 sm:w-5 sm:h-5" /> Lista
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="gantt" className="flex-grow m-0 focus-visible:ring-0">
-              <div className="h-[500px] sm:h-[600px] xl:h-[700px]">
+              <div className="h-[400px] sm:h-[600px] xl:h-[700px]">
                 <GanttChart 
                   tasks={projectTasks || []} 
                   onTaskEdit={(task) => {
@@ -380,8 +393,8 @@ export default function ProjectPage() {
 
       <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
         <DialogContent className="w-[95%] sm:max-w-[440px] rounded-2xl sm:rounded-3xl p-6 sm:p-8">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-black text-left">
+          <DialogHeader className="mb-4 text-left">
+            <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-black">
               <UserPlus className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
               Convidar Equipe
             </DialogTitle>
@@ -399,8 +412,8 @@ export default function ProjectPage() {
             </div>
           </div>
           <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row gap-2">
-            <Button variant="outline" className="rounded-full h-10 sm:h-12 font-bold px-6" onClick={() => setIsShareDialogOpen(false)}>Cancelar</Button>
-            <Button className="rounded-full h-10 sm:h-12 font-bold px-8 shadow-xl bg-primary" onClick={() => {
+            <Button variant="outline" className="rounded-full h-10 sm:h-12 font-bold px-6 text-xs sm:text-sm" onClick={() => setIsShareDialogOpen(false)}>Cancelar</Button>
+            <Button className="rounded-full h-10 sm:h-12 font-bold px-8 shadow-xl bg-primary text-xs sm:text-sm" onClick={() => {
               if (shareEmail) updateDocumentNonBlocking(doc(db, 'projects', id), { members: arrayUnion(shareEmail.trim().toLowerCase()) });
               setShareEmail('');
               setIsShareDialogOpen(false);

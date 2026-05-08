@@ -94,7 +94,7 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
             {initialTask ? 'Editar Tarefa' : 'Nova Tarefa'}
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-5 py-2">
+        <div className="grid gap-4 sm:gap-5 py-2">
           <div className="grid gap-1.5">
             <Label htmlFor="task-name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nome da Tarefa</Label>
             <Input 
@@ -193,8 +193,8 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
           </div>
         </div>
         <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row gap-2">
-          <Button variant="outline" className="rounded-full h-10 sm:h-12 font-bold px-6" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button className="bg-primary rounded-full h-10 sm:h-12 font-bold px-8 shadow-xl" onClick={handleSubmit}>
+          <Button variant="outline" className="rounded-full h-10 sm:h-12 font-bold px-6 text-xs sm:text-sm" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button className="bg-primary rounded-full h-10 sm:h-12 font-bold px-8 shadow-xl text-xs sm:text-sm" onClick={handleSubmit}>
             {initialTask ? 'Salvar Alterações' : 'Criar Tarefa'}
           </Button>
         </DialogFooter>
