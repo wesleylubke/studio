@@ -183,17 +183,17 @@ export default function ProjectPage() {
           </div>
           
           <div className="flex items-center gap-2">
-             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsShareDialogOpen(true)}>
-               <Share2 className="w-4 h-4" /> <span className="hidden xs:inline">Compartilhar</span>
-             </Button>
-             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsProjectDialogOpen(true)}>
-               <Edit2 className="w-4 h-4" /> <span className="hidden xs:inline">Editar</span>
-             </Button>
              <Button size="sm" className="bg-primary shadow-xl rounded-full h-10 font-bold gap-2 px-5 hover:scale-105 transition-transform" onClick={() => {
                setEditingTask(null);
                setIsTaskDialogOpen(true);
              }}>
                <Plus className="w-5 h-5" /> Nova Tarefa
+             </Button>
+             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsProjectDialogOpen(true)}>
+               <Edit2 className="w-4 h-4" /> <span className="hidden xs:inline">Editar</span>
+             </Button>
+             <Button variant="outline" size="sm" className="rounded-full h-10 font-bold gap-2 px-4" onClick={() => setIsShareDialogOpen(true)}>
+               <Share2 className="w-4 h-4" /> <span className="hidden xs:inline">Compartilhar</span>
              </Button>
           </div>
         </div>
