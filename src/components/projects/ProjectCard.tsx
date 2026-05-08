@@ -1,9 +1,20 @@
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Clock } from 'lucide-react';
+import { Users, Clock, ChevronDown, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
+import { ProjectStatus } from '@/types';
 
 interface ProjectCardProps {
   project: any;
@@ -11,11 +22,18 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter();
+  const db = useFirestore();
   const members = project.members || [];
   const memberCount = members.length;
 
   const handleCardClick = () => {
     router.push(`/projects/${project.id}`);
+  };
+
+  const handleStatusChange = (e: React.MouseEvent, newStatus: ProjectStatus) => {
+    e.stopPropagation();
+    if (!db || !project.id) return;
+    updateDocumentNonBlocking(doc(db, 'projects', project.id), { status: newStatus });
   };
 
   const getFriendlyName = (email: string) => {
@@ -26,16 +44,56 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       .join(' ');
   };
 
+  const statusMap: Record<ProjectStatus, { label: string; color: string }> = {
+    ongoing: { label: 'Em Andamento', color: 'bg-primary/20 text-primary' },
+    paused: { label: 'Pausado', color: 'bg-muted text-muted-foreground' },
+    finished: { label: 'Finalizado', color: 'bg-accent/20 text-accent' }
+  };
+
+  const currentStatus = (project.status as ProjectStatus) || 'ongoing';
+
   return (
     <Card 
       className="cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-muted/50 overflow-hidden group bg-card/40 backdrop-blur-sm"
       onClick={handleCardClick}
     >
       <CardHeader className="pb-6">
-        <div className="flex justify-between items-start gap-2 mb-2">
+        <div className="flex justify-between items-start gap-4 mb-3">
           <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors truncate">
             {project.name}
           </CardTitle>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "h-7 px-3 rounded-full border-none gap-1.5 text-[9px] font-black uppercase tracking-widest transition-all hover:scale-105",
+                  statusMap[currentStatus].color
+                )}
+              >
+                {statusMap[currentStatus].label}
+                <ChevronDown className="w-3 h-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-xl p-1 min-w-[150px] z-50" onClick={(e) => e.stopPropagation()}>
+              {(Object.keys(statusMap) as ProjectStatus[]).map((statusKey) => (
+                <DropdownMenuItem 
+                  key={statusKey} 
+                  className="rounded-lg py-2 text-[10px] font-black uppercase tracking-widest gap-2"
+                  onClick={(e) => handleStatusChange(e, statusKey)}
+                >
+                  <div className={cn(
+                    "w-2 h-2 rounded-full", 
+                    statusKey === currentStatus ? "bg-primary" : "bg-muted-foreground/20"
+                  )} />
+                  {statusMap[statusKey].label}
+                  {statusKey === currentStatus && <Check className="w-3 h-3 ml-auto text-primary" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10 mb-6 opacity-80">
