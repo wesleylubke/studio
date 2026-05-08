@@ -3,12 +3,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, GanttChart as GanttIcon, LogIn, LogOut, User as UserIcon, Loader2 } from 'lucide-react';
+import { LayoutDashboard, GanttChart as GanttIcon, LogIn, LogOut, User as UserIcon, Loader2, Edit2 } from 'lucide-react';
 import { useAuth, useUser, initiateGoogleSignIn } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import UserProfileDialog from '@/components/auth/UserProfileDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ export default function Navbar() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 
   const handleLogin = async () => {
     setIsLoggingIn(true);
@@ -80,44 +82,71 @@ export default function Navbar() {
           <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-muted-foreground" />
         ) : (
           user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 sm:gap-4 cursor-pointer hover:opacity-80 transition-all outline-none">
-                  <div className="hidden md:flex flex-col items-end mr-1">
-                    <span className="text-xs font-bold leading-none mb-0.5">{user.displayName}</span>
-                    <span className="text-[10px] text-muted-foreground leading-none">{user.email}</span>
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center gap-2 sm:gap-4 cursor-pointer hover:opacity-80 transition-all outline-none">
+                    <div className="hidden md:flex flex-col items-end mr-1">
+                      <span className="text-xs font-bold leading-none mb-0.5">{user.displayName}</span>
+                      <span className="text-[10px] text-muted-foreground leading-none">{user.email}</span>
+                    </div>
+                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-2 border-primary/20">
+                      <AvatarImage src={user.photoURL || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        <UserIcon className="w-4 h-4" />
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
-                  <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-2 border-primary/20">
-                    <AvatarImage src={user.photoURL || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      <UserIcon className="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 rounded-xl p-2 shadow-2xl">
-                <DropdownMenuLabel className="font-normal p-3">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-black leading-none">{user.displayName}</p>
-                    <p className="text-[10px] leading-none text-muted-foreground truncate">{user.email}</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer rounded-lg font-bold p-3"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-3 h-4 w-4" />
-                  <span>Sair da Conta</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 rounded-xl p-2 shadow-2xl">
+                  <DropdownMenuLabel className="font-normal p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-black leading-none">{user.displayName}</p>
+                        <p className="text-[10px] leading-none text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsProfileDialogOpen(true);
+                        }}
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="rounded-lg font-bold p-3 cursor-pointer"
+                    onClick={() => setIsProfileDialogOpen(true)}
+                  >
+                    <UserIcon className="mr-3 h-4 w-4" />
+                    <span>Editar Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer rounded-lg font-bold p-3"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-3 h-4 w-4" />
+                    <span>Sair da Conta</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <UserProfileDialog 
+                open={isProfileDialogOpen} 
+                onOpenChange={setIsProfileDialogOpen} 
+                user={user}
+              />
+            </>
           ) : (
             <Button size="sm" onClick={handleLogin} disabled={isLoggingIn} className="h-8 sm:h-9 text-xs sm:text-sm px-3 sm:px-4 rounded-full font-bold">
               {isLoggingIn ? (
-                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 h-4 sm:mr-2 animate-spin" />
               ) : (
-                <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+                <LogIn className="w-3.5 h-3.5 sm:w-4 h-4 sm:mr-2" />
               )}
               Entrar
             </Button>
