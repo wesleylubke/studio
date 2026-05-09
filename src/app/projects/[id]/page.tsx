@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import GanttChart from '@/components/gantt/GanttChart';
@@ -60,6 +60,33 @@ export default function ProjectPage() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [shareEmail, setShareEmail] = useState('');
+
+  // Drag-to-scroll for the table
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [isTableDragging, setIsTableDragging] = useState(false);
+  const [tableStartX, setTableStartX] = useState(0);
+  const [tableScrollLeft, setTableScrollLeft] = useState(0);
+
+  const handleTableMouseDown = (e: React.MouseEvent) => {
+    if (!tableContainerRef.current) return;
+    // Don't start drag if clicking interactive elements
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('.dropdown-trigger')) return;
+
+    setIsTableDragging(true);
+    setTableStartX(e.pageX - tableContainerRef.current.offsetLeft);
+    setTableScrollLeft(tableContainerRef.current.scrollLeft);
+  };
+
+  const handleTableMouseUp = () => setIsTableDragging(false);
+  const handleTableMouseLeave = () => setIsTableDragging(false);
+
+  const handleTableMouseMove = (e: React.MouseEvent) => {
+    if (!isTableDragging || !tableContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tableContainerRef.current.offsetLeft;
+    const walk = (x - tableStartX) * 1.5;
+    tableContainerRef.current.scrollLeft = tableScrollLeft - walk;
+  };
 
   const projectRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -273,22 +300,32 @@ export default function ProjectPage() {
 
             <TabsContent value="list" className="m-0 focus-visible:ring-0">
               <div className="bg-card/50 backdrop-blur-sm border rounded-xl sm:rounded-3xl overflow-hidden shadow-2xl">
-                <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-left min-w-[600px]">
+                <div 
+                  ref={tableContainerRef}
+                  onMouseDown={handleTableMouseDown}
+                  onMouseUp={handleTableMouseUp}
+                  onMouseLeave={handleTableMouseLeave}
+                  onMouseMove={handleTableMouseMove}
+                  className={cn(
+                    "overflow-x-auto custom-scrollbar select-none",
+                    isTableDragging ? "cursor-grabbing" : "cursor-grab"
+                  )}
+                >
+                  <table className="w-full text-left min-w-[700px] table-fixed">
                     <thead className="bg-muted/40 border-b text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <tr>
-                        <th className="px-3 sm:px-8 py-3 sm:py-5 w-12 sm:w-24 text-center">Ordem</th>
-                        <th className="px-3 sm:px-8 py-3 sm:py-5">Tarefa</th>
-                        <th className="px-3 sm:px-8 py-3 sm:py-5">Equipe</th>
-                        <th className="px-3 sm:px-8 py-3 sm:py-5">Timeline</th>
-                        <th className="px-3 sm:px-8 py-3 sm:py-5">Status</th>
-                        <th className="px-3 sm:px-8 py-3 sm:py-5 text-right">Ações</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[60px] sm:w-[100px] text-center">Ordem</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-auto">Tarefa</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[120px] sm:w-[180px]">Equipe</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[110px] sm:w-[150px]">Timeline</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[80px] sm:w-[120px]">Status</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[60px] sm:w-[100px] text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {projectTasks?.map((task, index) => (
                         <tr key={task.id} className="hover:bg-primary/5 transition-colors group">
-                          <td className="px-3 sm:px-8 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4 py-3 sm:py-4">
                             <div className="flex flex-col items-center gap-0.5 opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
                               <Button 
                                 variant="ghost" 
@@ -310,42 +347,42 @@ export default function ProjectPage() {
                               </Button>
                             </div>
                           </td>
-                          <td className="px-3 sm:px-8 py-3 sm:py-4">
-                            <p className="font-bold text-xs sm:text-base group-hover:text-primary transition-colors">{task.name}</p>
-                            <p className="text-[9px] sm:text-xs text-muted-foreground truncate max-w-[100px] sm:max-w-xs">{task.description}</p>
+                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                            <p className="font-bold text-xs sm:text-base group-hover:text-primary transition-colors truncate">{task.name}</p>
+                            <p className="text-[9px] sm:text-xs text-muted-foreground truncate opacity-70">{task.description}</p>
                           </td>
-                          <td className="px-3 sm:px-8 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4 py-3 sm:py-4">
                             {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
-                              <div className="flex flex-wrap gap-1 max-w-[120px] sm:max-w-none">
+                              <div className="flex flex-wrap gap-1">
                                 {task.assigneeEmails.map(email => (
-                                  <Badge key={email} variant="secondary" className="text-[7px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-primary/20 text-primary border-none shadow-sm">
+                                  <Badge key={email} variant="secondary" className="text-[7px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-primary/20 text-primary border-none shadow-sm whitespace-nowrap">
                                     {getFriendlyName(email)}
                                   </Badge>
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-[7px] sm:text-[10px] font-bold text-muted-foreground/50 italic">Vago</span>
+                              <span className="text-[7px] sm:text-[10px] font-bold text-muted-foreground/30 italic">Vago</span>
                             )}
                           </td>
-                          <td className="px-3 sm:px-8 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4 py-3 sm:py-4">
                             <div className="text-[9px] sm:text-xs font-bold whitespace-nowrap">
                               <span className="text-muted-foreground">{format(parseLocalDate(task.startDate), 'dd MMM')}</span>
-                              <span className="mx-1 sm:mx-2 text-primary opacity-50">—</span>
+                              <span className="mx-1 text-primary opacity-30">—</span>
                               <span className="text-muted-foreground">{format(parseLocalDate(task.endDate), 'dd MMM')}</span>
                             </div>
                           </td>
-                          <td className="px-3 sm:px-8 py-3 sm:py-4">
-                            <div className="flex items-center gap-2 sm:gap-4">
-                              <div className="w-12 sm:w-24 h-1 sm:h-2 bg-muted rounded-full overflow-hidden shadow-inner hidden sm:block">
+                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] sm:text-xs font-black min-w-[30px] text-center">{task.progress}%</span>
+                              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden shadow-inner hidden sm:block">
                                 <div className={cn("h-full transition-all duration-500", task.progress === 100 ? "bg-accent" : "bg-primary")} style={{ width: `${task.progress}%` }} />
                               </div>
-                              <span className="text-[9px] sm:text-xs font-black">{task.progress}%</span>
                             </div>
                           </td>
-                          <td className="px-3 sm:px-8 py-3 sm:py-4 text-right">
+                          <td className="px-2 sm:px-4 py-3 sm:py-4 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity dropdown-trigger">
                                   <MoreVertical className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                                 </Button>
                               </DropdownMenuTrigger>
