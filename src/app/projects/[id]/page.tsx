@@ -244,7 +244,7 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Stats Grid - Fixed 4 columns even on mobile */}
+        {/* Stats Grid - Permanent single line with icons */}
         <div className="grid grid-cols-4 gap-2 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
