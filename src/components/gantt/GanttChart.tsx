@@ -6,15 +6,9 @@ import { format, differenceInDays, addDays, startOfDay, min, max, eachDayOfInter
 import { Task } from '@/types';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
+import { Calendar, ChevronUp, ChevronDown } from 'lucide-react';
 import { useUser } from '@/firebase';
 
 interface GanttChartProps {
@@ -199,7 +193,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                      <Button 
                        variant="ghost" 
                        size="icon" 
-                       className="h-5 w-5 sm:h-6 sm:w-6 hover:bg-primary/20 rounded-md" 
+                       className="h-5 w-5 sm:h-6 w-6 hover:bg-primary/20 rounded-md" 
                        disabled={index === 0}
                        onClick={(e) => {
                          e.stopPropagation();
@@ -211,7 +205,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                      <Button 
                        variant="ghost" 
                        size="icon" 
-                       className="h-5 w-5 sm:h-6 sm:w-6 hover:bg-primary/20 rounded-md" 
+                       className="h-5 w-5 sm:h-6 w-6 hover:bg-primary/20 rounded-md" 
                        disabled={index === chartData.length - 1}
                        onClick={(e) => {
                          e.stopPropagation();
@@ -223,64 +217,36 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   </div>
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
-                     <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors">{task.name}</span>
-                     <div className="flex items-center gap-1 sm:gap-2">
-                        <div className="flex-grow h-0.5 sm:h-1 bg-muted rounded-full overflow-hidden max-w-[20px] sm:max-w-[40px]">
+                     <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">{task.name}</span>
+                     <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
+                        <div className="flex-grow h-0.5 sm:h-1 bg-muted rounded-full overflow-hidden max-w-[20px] sm:max-w-[40px] shrink-0">
                            <div className="h-full bg-primary" style={{ width: `${task.progress}%` }} />
                         </div>
-                        <span className="text-[8px] text-muted-foreground font-black shrink-0">
+                        <span className="text-[8px] text-muted-foreground font-black shrink-0 mr-1">
                           {task.progress}%
                         </span>
                         
-                        {/* Assignees initials - Tiny avatars in sidebar */}
+                        {/* Assignees Badges - Compact in sidebar */}
                         {task.assigneeEmails && task.assigneeEmails.length > 0 && (
-                          <div className="flex -space-x-1.5 ml-auto">
-                            {task.assigneeEmails.slice(0, 2).map((email) => (
-                              <div 
+                          <div className="hidden sm:flex items-center gap-1 ml-auto overflow-hidden">
+                            {task.assigneeEmails.slice(0, 1).map((email) => (
+                              <Badge 
                                 key={email} 
-                                className="w-4 h-4 rounded-full bg-primary/20 border border-card flex items-center justify-center text-[7px] font-black text-primary shrink-0"
-                                title={getFriendlyName(email)}
+                                variant="secondary" 
+                                className="text-[7px] font-bold px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
                               >
-                                {getFriendlyName(email).charAt(0)}
-                              </div>
+                                {getFriendlyName(email).split(' ')[0]}
+                              </Badge>
                             ))}
-                            {task.assigneeEmails.length > 2 && (
-                              <div className="w-4 h-4 rounded-full bg-muted border border-card flex items-center justify-center text-[7px] font-black text-muted-foreground shrink-0">
-                                +{task.assigneeEmails.length - 2}
-                              </div>
+                            {task.assigneeEmails.length > 1 && (
+                              <Badge variant="outline" className="text-[7px] font-bold px-1 py-0 border-primary/20 text-primary/70 shrink-0">
+                                +{task.assigneeEmails.length - 1}
+                              </Badge>
                             )}
                           </div>
                         )}
                      </div>
                   </div>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild className="dropdown-trigger">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-9 sm:w-9 opacity-40 group-hover:opacity-100 transition-opacity rounded-xl">
-                        <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-xl p-2 min-w-[140px] sm:min-w-[160px]">
-                      <DropdownMenuItem 
-                        className="rounded-lg py-1.5 sm:py-2 font-bold text-xs sm:text-sm" 
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          setTimeout(() => onTaskEdit?.(task), 100);
-                        }}
-                      >
-                        <Edit className="w-4 h-4 mr-2" /> Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="rounded-lg py-1.5 sm:py-2 font-bold text-destructive text-xs sm:text-sm" 
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          onTaskDelete?.(task.id);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" /> Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
 
                 {/* Bars Area */}
