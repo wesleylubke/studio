@@ -146,7 +146,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
         <div className="inline-flex flex-col min-w-full min-h-full">
           {/* Unified Sticky Header */}
           <div className="flex sticky top-0 z-30 border-b bg-card/95 backdrop-blur-md">
-            <div className="w-40 sm:w-64 flex-shrink-0 border-r p-4 sm:p-6 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
+            <div className="w-40 sm:w-64 flex-shrink-0 border-r p-3 sm:p-6 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
               Estrutura
             </div>
             
@@ -159,20 +159,20 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   <div 
                     key={idx} 
                     className={cn(
-                      "flex-shrink-0 text-center border-r h-16 sm:h-20 flex flex-col justify-center transition-colors relative",
+                      "flex-shrink-0 text-center border-r h-14 sm:h-20 flex flex-col justify-center transition-colors relative",
                       isSatSun ? "bg-muted/30" : "bg-transparent",
                       isTodayDate && "bg-primary/5"
                     )}
                     style={{ width: DAY_WIDTH }}
                   >
                     <span className={cn(
-                      "text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-1",
+                      "text-[7px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1",
                       isTodayDate && "text-primary"
                     )}>
                       {format(date, 'EEE')}
                     </span>
                     <span className={cn(
-                      "text-[10px] sm:text-sm font-black",
+                      "text-[9px] sm:text-sm font-black",
                       isTodayDate && "text-primary bg-primary/10 rounded-full w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center mx-auto"
                     )}>
                       {format(date, 'd')}
@@ -186,14 +186,14 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
           {/* Grid Content */}
           <div className="flex flex-col divide-y divide-white/5 bg-card/50">
             {chartData.map((task, index) => (
-              <div key={task.id} className="flex h-14 sm:h-16 hover:bg-primary/5 transition-colors group">
+              <div key={task.id} className="flex h-12 sm:h-16 hover:bg-primary/5 transition-colors group">
                 {/* Task Label Sidebar - Sticky */}
                 <div className="w-40 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center gap-1 sm:gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-sm">
-                  <div className="flex flex-col opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
+                  <div className="flex flex-col opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity shrink-0">
                      <Button 
                        variant="ghost" 
                        size="icon" 
-                       className="h-5 w-5 sm:h-6 w-6 hover:bg-primary/20 rounded-md" 
+                       className="h-4 w-4 sm:h-6 sm:w-6 hover:bg-primary/20 rounded-md" 
                        disabled={index === 0}
                        onClick={(e) => {
                          e.stopPropagation();
@@ -205,7 +205,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                      <Button 
                        variant="ghost" 
                        size="icon" 
-                       className="h-5 w-5 sm:h-6 w-6 hover:bg-primary/20 rounded-md" 
+                       className="h-4 w-4 sm:h-6 sm:w-6 hover:bg-primary/20 rounded-md" 
                        disabled={index === chartData.length - 1}
                        onClick={(e) => {
                          e.stopPropagation();
@@ -217,24 +217,24 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   </div>
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
-                     <span className="truncate text-[10px] sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">
+                     <span className="truncate text-[10px] sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-0.5 sm:mb-1">
                         {task.name}
                      </span>
-                     <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
+                     <div className="flex items-center gap-1 overflow-hidden">
                         {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
                           <div className="flex items-center gap-1 overflow-hidden">
                             {task.assigneeEmails.map((email) => (
                               <Badge 
                                 key={email} 
                                 variant="secondary" 
-                                className="text-[7px] font-bold px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
+                                className="text-[6px] sm:text-[7px] font-bold px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
                               >
                                 {getFriendlyName(email)}
                               </Badge>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-[8px] text-muted-foreground/50 italic">Sem equipe</span>
+                          <span className="text-[7px] text-muted-foreground/50 italic">Vago</span>
                         )}
                      </div>
                   </div>
@@ -247,7 +247,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                       <TooltipTrigger asChild>
                         <div 
                           className={cn(
-                            "absolute top-3 sm:top-4 h-7 sm:h-8 rounded-lg sm:rounded-xl shadow-xl transition-all hover:scale-[1.01] hover:brightness-110 cursor-pointer overflow-hidden border border-white/10 group/bar",
+                            "absolute top-2.5 sm:top-4 h-6 sm:h-8 rounded-md sm:rounded-xl shadow-xl transition-all hover:scale-[1.01] hover:brightness-110 cursor-pointer overflow-hidden border border-white/10 group/bar",
                             task.progress === 100 ? "ring-1 ring-accent/30" : "ring-1 ring-primary/30"
                           )}
                           style={{ 
@@ -264,8 +264,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                             )}
                             style={{ width: `${task.progress}%` }}
                           />
-                          <div className="absolute inset-0 flex items-center px-2 sm:px-4 pointer-events-none">
-                             <span className="text-[9px] sm:text-[10px] font-black text-white truncate drop-shadow-md">
+                          <div className="absolute inset-0 flex items-center px-1 sm:px-4 pointer-events-none">
+                             <span className="text-[8px] sm:text-[10px] font-black text-white truncate drop-shadow-md">
                                 {task.name} ({task.progress}%)
                              </span>
                           </div>

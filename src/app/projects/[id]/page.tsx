@@ -181,59 +181,59 @@ export default function ProjectPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow p-4 sm:p-8 flex flex-col space-y-8 max-w-[1600px] mx-auto w-full">
+      <main className="flex-grow p-3 sm:p-8 flex flex-col space-y-6 sm:space-y-8 max-w-[1600px] mx-auto w-full">
         {/* Header Section */}
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
-          <div className="space-y-3 w-full">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6">
+          <div className="space-y-2 sm:space-y-3 w-full">
             <div className="flex items-center gap-2 text-muted-foreground text-[10px] font-bold uppercase tracking-widest overflow-x-auto whitespace-nowrap pb-1">
               <span className="hover:text-primary cursor-pointer transition-colors" onClick={() => router.push('/')}>Portfólio</span>
               <ChevronRight className="w-3 h-3 flex-shrink-0" />
               <span className="text-foreground">{project.name}</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl sm:text-5xl font-black tracking-tighter break-words">
+              <h1 className="text-xl sm:text-5xl font-black tracking-tighter break-words">
                 {project.name}
               </h1>
-              <Badge className="bg-primary/20 text-primary border-none px-3 py-0.5 text-[10px] sm:text-sm font-black whitespace-nowrap">
+              <Badge className="bg-primary/20 text-primary border-none px-2 sm:px-3 py-0.5 text-[9px] sm:text-sm font-black whitespace-nowrap">
                 {stats.avgProgress}% CONCLUÍDO
               </Badge>
             </div>
-            <p className="text-muted-foreground text-sm sm:text-lg max-w-3xl leading-relaxed">{project.description}</p>
+            <p className="text-muted-foreground text-xs sm:text-lg max-w-3xl leading-relaxed">{project.description}</p>
           </div>
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
-             <Button size="sm" className="flex-1 sm:flex-none bg-primary shadow-xl rounded-full h-10 font-bold gap-2 px-5 hover:scale-105 transition-transform text-xs sm:text-sm" onClick={() => {
+             <Button size="sm" className="flex-1 sm:flex-none bg-primary shadow-xl rounded-full h-9 sm:h-10 font-bold gap-2 px-4 sm:px-5 hover:scale-105 transition-transform text-xs sm:text-sm" onClick={() => {
                setEditingTask(null);
                setIsTaskDialogOpen(true);
              }}>
-               <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> Nova Tarefa
+               <Plus className="w-4 h-4" /> Nova Tarefa
              </Button>
-             <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-full h-10 font-bold gap-2 px-4 text-xs sm:text-sm" onClick={() => setIsProjectDialogOpen(true)}>
-               <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden xs:inline">Editar</span>
+             <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-full h-9 sm:h-10 font-bold gap-2 px-3 sm:px-4 text-xs sm:text-sm" onClick={() => setIsProjectDialogOpen(true)}>
+               <Edit2 className="w-3 h-3" /> <span className="hidden xs:inline">Editar</span>
              </Button>
-             <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-full h-10 font-bold gap-2 px-4 text-xs sm:text-sm" onClick={() => setIsShareDialogOpen(true)}>
-               <Share2 className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden xs:inline">Compartilhar</span>
+             <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-full h-9 sm:h-10 font-bold gap-2 px-3 sm:px-4 text-xs sm:text-sm" onClick={() => setIsShareDialogOpen(true)}>
+               <Share2 className="w-3 h-3" /> <span className="hidden xs:inline">Compartilhar</span>
              </Button>
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - Fixed 4 columns even on mobile */}
         <div className="grid grid-cols-4 gap-2 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
-            { label: 'Concluídas', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
-            { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
-            { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
+            { label: 'Feito', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
+            { label: 'Falta', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
+            { label: 'Prog.', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-5 backdrop-blur-sm shadow-lg h-auto min-h-[80px] sm:min-h-[100px]">
-              <div className={cn("p-1.5 sm:p-3 rounded-lg sm:rounded-2xl shrink-0", stat.bg)}>
-                <stat.icon className={cn("w-4 h-4 sm:w-7 sm:h-7", stat.color)} />
+            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-1.5 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg h-full min-h-[70px] sm:min-h-[100px]">
+              <div className={cn("p-1 sm:p-3 rounded-lg sm:rounded-2xl shrink-0 hidden xs:flex", stat.bg)}>
+                <stat.icon className={cn("w-3 h-3 sm:w-7 sm:h-7", stat.color)} />
               </div>
               <div className="flex-1 min-w-0 text-center sm:text-left">
-                <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-0.5 sm:mb-1 whitespace-normal">
+                <p className="text-[7px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-0.5 sm:mb-1 whitespace-normal">
                   {stat.label}
                 </p>
-                <p className="text-sm sm:text-2xl font-black leading-tight">
+                <p className="text-xs sm:text-2xl font-black leading-tight">
                   {stat.value}
                 </p>
               </div>
@@ -244,12 +244,12 @@ export default function ProjectPage() {
         {/* Main Content (Tabs) */}
         <div className="flex-grow flex flex-col min-h-[500px]">
           <Tabs defaultValue="gantt" className="w-full flex-grow flex flex-col">
-            <div className="flex justify-center sm:justify-between items-center mb-6">
-               <TabsList className="bg-muted/50 border-2 rounded-full p-1 h-12 sm:h-14 w-full sm:w-auto">
-                <TabsTrigger value="gantt" className="flex-1 sm:flex-none rounded-full px-4 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-[10px] sm:text-sm">
+            <div className="flex justify-center sm:justify-between items-center mb-4 sm:mb-6">
+               <TabsList className="bg-muted/50 border-2 rounded-full p-1 h-10 sm:h-14 w-full sm:w-auto">
+                <TabsTrigger value="gantt" className="flex-1 sm:flex-none rounded-full px-3 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-[10px] sm:text-sm">
                   <GanttIcon className="w-3 h-3 sm:w-5 sm:h-5" /> Gantt
                 </TabsTrigger>
-                <TabsTrigger value="list" className="flex-1 sm:flex-none rounded-full px-4 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-[10px] sm:text-sm">
+                <TabsTrigger value="list" className="flex-1 sm:flex-none rounded-full px-3 sm:px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 text-[10px] sm:text-sm">
                   <LayoutList className="w-3 h-3 sm:w-5 sm:h-5" /> Lista
                 </TabsTrigger>
               </TabsList>
@@ -272,81 +272,81 @@ export default function ProjectPage() {
             </TabsContent>
 
             <TabsContent value="list" className="m-0 focus-visible:ring-0">
-              <div className="bg-card/50 backdrop-blur-sm border rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
+              <div className="bg-card/50 backdrop-blur-sm border rounded-xl sm:rounded-3xl overflow-hidden shadow-2xl">
                 <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-left min-w-[700px]">
-                    <thead className="bg-muted/40 border-b text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  <table className="w-full text-left min-w-[600px]">
+                    <thead className="bg-muted/40 border-b text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <tr>
-                        <th className="px-4 sm:px-8 py-4 sm:py-5 w-16 sm:w-24 text-center">Ordem</th>
-                        <th className="px-4 sm:px-8 py-4 sm:py-5">Tarefa</th>
-                        <th className="px-4 sm:px-8 py-4 sm:py-5">Equipe</th>
-                        <th className="px-4 sm:px-8 py-4 sm:py-5">Timeline</th>
-                        <th className="px-4 sm:px-8 py-4 sm:py-5">Status</th>
-                        <th className="px-4 sm:px-8 py-4 sm:py-5 text-right">Ações</th>
+                        <th className="px-3 sm:px-8 py-3 sm:py-5 w-12 sm:w-24 text-center">Ordem</th>
+                        <th className="px-3 sm:px-8 py-3 sm:py-5">Tarefa</th>
+                        <th className="px-3 sm:px-8 py-3 sm:py-5">Equipe</th>
+                        <th className="px-3 sm:px-8 py-3 sm:py-5">Timeline</th>
+                        <th className="px-3 sm:px-8 py-3 sm:py-5">Status</th>
+                        <th className="px-3 sm:px-8 py-3 sm:py-5 text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {projectTasks?.map((task, index) => (
                         <tr key={task.id} className="hover:bg-primary/5 transition-colors group">
-                          <td className="px-4 sm:px-8 py-4 sm:py-5">
-                            <div className="flex flex-col items-center gap-1 opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
+                          <td className="px-3 sm:px-8 py-3 sm:py-4">
+                            <div className="flex flex-col items-center gap-0.5 opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg hover:bg-primary/20"
+                                className="h-5 w-5 sm:h-7 sm:w-7 rounded-md hover:bg-primary/20"
                                 disabled={index === 0}
                                 onClick={() => handleMoveTask(task.id, 'up')}
                               >
-                                <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg hover:bg-primary/20"
+                                className="h-5 w-5 sm:h-7 sm:w-7 rounded-md hover:bg-primary/20"
                                 disabled={index === (projectTasks?.length || 0) - 1}
                                 onClick={() => handleMoveTask(task.id, 'down')}
                               >
-                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                             </div>
                           </td>
-                          <td className="px-4 sm:px-8 py-4 sm:py-5">
-                            <p className="font-bold text-sm sm:text-base group-hover:text-primary transition-colors">{task.name}</p>
-                            <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-xs">{task.description}</p>
+                          <td className="px-3 sm:px-8 py-3 sm:py-4">
+                            <p className="font-bold text-xs sm:text-base group-hover:text-primary transition-colors">{task.name}</p>
+                            <p className="text-[9px] sm:text-xs text-muted-foreground truncate max-w-[100px] sm:max-w-xs">{task.description}</p>
                           </td>
-                          <td className="px-4 sm:px-8 py-4 sm:py-5">
+                          <td className="px-3 sm:px-8 py-3 sm:py-4">
                             {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
+                              <div className="flex flex-wrap gap-1 max-w-[120px] sm:max-w-none">
                                 {task.assigneeEmails.map(email => (
-                                  <Badge key={email} variant="secondary" className="text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-primary/20 text-primary border-none shadow-sm">
+                                  <Badge key={email} variant="secondary" className="text-[7px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-primary/20 text-primary border-none shadow-sm">
                                     {getFriendlyName(email)}
                                   </Badge>
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-[8px] sm:text-[10px] font-bold text-muted-foreground/50 italic">Sem equipe</span>
+                              <span className="text-[7px] sm:text-[10px] font-bold text-muted-foreground/50 italic">Vago</span>
                             )}
                           </td>
-                          <td className="px-4 sm:px-8 py-4 sm:py-5">
-                            <div className="text-[10px] sm:text-xs font-bold whitespace-nowrap">
+                          <td className="px-3 sm:px-8 py-3 sm:py-4">
+                            <div className="text-[9px] sm:text-xs font-bold whitespace-nowrap">
                               <span className="text-muted-foreground">{format(parseLocalDate(task.startDate), 'dd MMM')}</span>
                               <span className="mx-1 sm:mx-2 text-primary opacity-50">—</span>
                               <span className="text-muted-foreground">{format(parseLocalDate(task.endDate), 'dd MMM')}</span>
                             </div>
                           </td>
-                          <td className="px-4 sm:px-8 py-4 sm:py-5">
+                          <td className="px-3 sm:px-8 py-3 sm:py-4">
                             <div className="flex items-center gap-2 sm:gap-4">
-                              <div className="w-16 sm:w-24 h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden shadow-inner hidden xs:block">
+                              <div className="w-12 sm:w-24 h-1 sm:h-2 bg-muted rounded-full overflow-hidden shadow-inner hidden sm:block">
                                 <div className={cn("h-full transition-all duration-500", task.progress === 100 ? "bg-accent" : "bg-primary")} style={{ width: `${task.progress}%` }} />
                               </div>
-                              <span className="text-[10px] sm:text-xs font-black">{task.progress}%</span>
+                              <span className="text-[9px] sm:text-xs font-black">{task.progress}%</span>
                             </div>
                           </td>
-                          <td className="px-4 sm:px-8 py-4 sm:py-5 text-right">
+                          <td className="px-3 sm:px-8 py-3 sm:py-4 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
-                                  <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
+                                  <MoreVertical className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-xl p-2 min-w-[160px]">
