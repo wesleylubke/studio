@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, ChevronDown, Check, Target, Calendar } from 'lucide-react';
@@ -12,7 +13,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useFirestore, updateDocumentNonBlocking, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, updateDocumentNonBlocking, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { ProjectStatus, Task } from '@/types';
@@ -33,6 +34,7 @@ const parseLocalDate = (dateStr: string) => {
 export default function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter();
   const db = useFirestore();
+  const { user } = useUser();
   const members = project.members || [];
   const memberCount = members.length;
 
@@ -63,7 +65,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   };
 
   const getFriendlyName = (email: string) => {
-    if (!email) return '';
+    if (!email) return 'Usuário';
+    if (user && email === user.email && user.displayName) return user.displayName;
+    
     return email.split('@')[0]
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))

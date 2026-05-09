@@ -138,6 +138,9 @@ export default function ProjectPage() {
 
   const getFriendlyName = (email: string) => {
     if (!email) return 'Usuário';
+    // Se o e-mail for do usuário logado e ele tiver displayName, usa ele
+    if (user && email === user.email && user.displayName) return user.displayName;
+    
     return email.split('@')[0]
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
@@ -214,7 +217,7 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Stats Grid - One line on mobile */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-4 gap-2 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },

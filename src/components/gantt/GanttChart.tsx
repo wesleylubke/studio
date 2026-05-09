@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MoreVertical, Edit, Trash2, Users, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 interface GanttChartProps {
   tasks: Task[];
@@ -37,6 +38,7 @@ const parseLocalDate = (dateStr: string) => {
 
 export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask }: GanttChartProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
   
   // Mouse drag-to-scroll state
   const [isDragging, setIsDragging] = useState(false);
@@ -124,7 +126,9 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
   };
 
   const getFriendlyName = (email: string) => {
-    if (!email) return '';
+    if (!email) return 'Usuário';
+    if (user && email === user.email && user.displayName) return user.displayName;
+    
     return email.split('@')[0]
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))

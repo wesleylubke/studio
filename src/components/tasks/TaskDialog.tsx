@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Task } from '@/types';
 import { format } from 'date-fns';
 import { Users, Calendar as CalendarIcon, FileText } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 interface TaskDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface TaskDialogProps {
 }
 
 export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, projectMembers = [] }: TaskDialogProps) {
+  const { user } = useUser();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -80,6 +82,8 @@ export default function TaskDialog({ open, onOpenChange, onSubmit, initialTask, 
   };
 
   const getFriendlyName = (email: string) => {
+    if (user && email === user.email && user.displayName) return user.displayName;
+    
     return email.split('@')[0]
       .split(/[._-]/)
       .map(part => part.charAt(0).toUpperCase() + part.slice(1))
