@@ -217,7 +217,9 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   </div>
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
-                     <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">{task.name}</span>
+                     <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">
+                        {task.name} <span className="text-primary/70 font-medium">({task.progress}%)</span>
+                     </span>
                      <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
                         {/* Assignees Badges - Compact in sidebar */}
                         {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
