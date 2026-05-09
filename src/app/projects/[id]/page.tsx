@@ -245,14 +245,14 @@ export default function ProjectPage() {
         </div>
 
         {/* Stats Grid - Permanent single line with icons */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-6">
+        <div className="flex flex-row gap-2 sm:gap-6 w-full">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
             { label: 'Feito', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Falta', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Prog.', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-1.5 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg h-full min-h-[70px] sm:min-h-[100px]">
+            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg flex-1 min-w-0">
               <div className={cn("p-1 sm:p-3 rounded-lg sm:rounded-2xl shrink-0 hidden xs:flex", stat.bg)}>
                 <stat.icon className={cn("w-3 h-3 sm:w-7 sm:h-7", stat.color)} />
               </div>
@@ -313,19 +313,19 @@ export default function ProjectPage() {
                 >
                   <table className="w-full text-left min-w-[700px] table-fixed">
                     <thead className="bg-muted/40 border-b text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                      <tr>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[60px] sm:w-[100px] text-center">Ordem</th>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[150px] sm:w-[300px]">Tarefa</th>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[120px] sm:w-[180px]">Equipe</th>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[110px] sm:w-[150px]">Timeline</th>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[80px] sm:w-[120px]">Status</th>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[60px] sm:w-[100px] text-right">Ações</th>
+                      <tr className="h-14 sm:h-20">
+                        <th className="px-2 sm:px-4 w-[60px] sm:w-[80px] text-center">Ordem</th>
+                        <th className="px-2 sm:px-4 w-[160px] sm:w-[256px]">Tarefa</th>
+                        <th className="px-2 sm:px-4 w-[120px] sm:w-[200px]">Equipe</th>
+                        <th className="px-2 sm:px-4 w-[110px] sm:w-[160px]">Timeline</th>
+                        <th className="px-2 sm:px-4 w-[80px] sm:w-[120px]">Status</th>
+                        <th className="px-2 sm:px-4 w-[60px] sm:w-[80px] text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {projectTasks?.map((task, index) => (
-                        <tr key={task.id} className="hover:bg-primary/5 transition-colors group">
-                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                        <tr key={task.id} className="hover:bg-primary/5 transition-colors group h-12 sm:h-16">
+                          <td className="px-2 sm:px-4">
                             <div className="flex flex-col items-center gap-0.5 opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
                               <Button 
                                 variant="ghost" 
@@ -347,11 +347,11 @@ export default function ProjectPage() {
                               </Button>
                             </div>
                           </td>
-                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4">
                             <p className="font-bold text-xs sm:text-base group-hover:text-primary transition-colors truncate">{task.name}</p>
                             <p className="text-[9px] sm:text-xs text-muted-foreground truncate opacity-70">{task.description}</p>
                           </td>
-                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4">
                             {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {task.assigneeEmails.map(email => (
@@ -364,14 +364,14 @@ export default function ProjectPage() {
                               <span className="text-[7px] sm:text-[10px] font-bold text-muted-foreground/30 italic">Vago</span>
                             )}
                           </td>
-                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4">
                             <div className="text-[9px] sm:text-xs font-bold whitespace-nowrap">
                               <span className="text-muted-foreground">{format(parseLocalDate(task.startDate), 'dd MMM')}</span>
                               <span className="mx-1 text-primary opacity-30">—</span>
                               <span className="text-muted-foreground">{format(parseLocalDate(task.endDate), 'dd MMM')}</span>
                             </div>
                           </td>
-                          <td className="px-2 sm:px-4 py-3 sm:py-4">
+                          <td className="px-2 sm:px-4">
                             <div className="flex items-center gap-2">
                               <span className="text-[9px] sm:text-xs font-black min-w-[30px] text-center">{task.progress}%</span>
                               <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden shadow-inner hidden sm:block">
@@ -379,7 +379,7 @@ export default function ProjectPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-2 sm:px-4 py-3 sm:py-4 text-right">
+                          <td className="px-2 sm:px-4 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity dropdown-trigger">
