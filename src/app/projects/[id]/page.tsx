@@ -218,22 +218,22 @@ export default function ProjectPage() {
         </div>
 
         {/* Stats Grid - Revised for better fit and responsiveness */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
             { label: 'Concluídas', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-2xl p-4 sm:p-6 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg overflow-hidden">
+            <div key={i} className="bg-card/50 border rounded-2xl p-4 sm:p-6 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg overflow-hidden h-full">
               <div className={cn("p-3 sm:p-4 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
                 <stat.icon className={cn("w-5 h-5 sm:w-7 sm:h-7", stat.color)} />
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1">
                   {stat.label}
                 </p>
-                <p className="text-lg sm:text-2xl font-black leading-tight truncate">
+                <p className="text-lg sm:text-2xl font-black leading-tight">
                   {stat.value}
                 </p>
               </div>
