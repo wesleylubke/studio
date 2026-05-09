@@ -229,9 +229,9 @@ export default function ProjectPage() {
               <div className={cn("p-3 sm:p-4 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
                 <stat.icon className={cn("w-5 h-5 sm:w-7 sm:h-7", stat.color)} />
               </div>
-              <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1">{stat.label}</p>
-                <p className="text-lg sm:text-3xl font-black leading-tight truncate">{stat.value}</p>
+              <div className="min-w-fit">
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1 whitespace-nowrap">{stat.label}</p>
+                <p className="text-lg sm:text-3xl font-black leading-tight whitespace-nowrap">{stat.value}</p>
               </div>
             </div>
           ))}
