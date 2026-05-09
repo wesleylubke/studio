@@ -7,8 +7,11 @@ service cloud.firestore {
     }
 
     function isProjectMember(projectId) {
-      let project = get(/databases/$(database)/documents/projects/$(projectId)).data;
-      return request.auth.token.email in project.members || request.auth.uid == project.ownerId;
+      let projectPath = /databases/$(database)/documents/projects/$(projectId);
+      return isSignedIn() && exists(projectPath) && (
+        get(projectPath).data.ownerId == request.auth.uid || 
+        (request.auth.token.email != null && request.auth.token.email in get(projectPath).data.members)
+      );
     }
 
     match /users/{userId} {
@@ -16,14 +19,22 @@ service cloud.firestore {
     }
 
     match /projects/{projectId} {
-      allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.token.email in resource.data.members);
-      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.token.email in resource.data.members);
+      allow list, get: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid || 
+        (request.auth.token.email != null && request.auth.token.email in resource.data.members)
+      );
+      
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.token.email in resource.data.members);
+      
+      allow update: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid || 
+        (request.auth.token.email != null && request.auth.token.email in resource.data.members)
+      );
+      
       allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 
       match /tasks/{taskId} {
-        allow read, write: if isSignedIn() && isProjectMember(projectId);
+        allow read, write: if isProjectMember(projectId);
       }
     }
   }
