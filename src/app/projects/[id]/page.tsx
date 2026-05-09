@@ -218,22 +218,22 @@ export default function ProjectPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-4 gap-2 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
             { label: 'Concluídas', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-2xl p-3 sm:p-4 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg h-auto min-h-[80px]">
-              <div className={cn("p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
-                <stat.icon className={cn("w-5 h-5 sm:w-7 sm:h-7", stat.color)} />
+            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-5 backdrop-blur-sm shadow-lg h-auto min-h-[80px] sm:min-h-[100px]">
+              <div className={cn("p-1.5 sm:p-3 rounded-lg sm:rounded-2xl shrink-0", stat.bg)}>
+                <stat.icon className={cn("w-4 h-4 sm:w-7 sm:h-7", stat.color)} />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1 whitespace-normal">
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-0.5 sm:mb-1 whitespace-normal">
                   {stat.label}
                 </p>
-                <p className="text-lg sm:text-2xl font-black leading-tight">
+                <p className="text-sm sm:text-2xl font-black leading-tight">
                   {stat.value}
                 </p>
               </div>
