@@ -145,7 +145,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   {memberCount}
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="p-3 bg-card/95 backdrop-blur-md border-2 rounded-xl shadow-2xl z-50 min-w-[200px]">
+              <TooltipContent side="bottom" className="p-3 bg-card/95 backdrop-blur-md border border-white/10 rounded-xl shadow-xl z-50 min-w-[200px]">
                 <div className="space-y-3">
                   <p className="text-[10px] font-black uppercase tracking-widest text-primary border-b border-primary/20 pb-1">Equipe com Acesso</p>
                   <div className="flex flex-col gap-2">
@@ -169,8 +169,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   {stats.endDate ? format(stats.endDate, 'dd/MM/yy') : 'TBD'}
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="px-3 py-1.5 bg-card/95 backdrop-blur-md border-2 rounded-xl shadow-2xl z-50">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Previsão de Conclusão</p>
+              <TooltipContent side="bottom" className="px-2 py-1 bg-popover text-popover-foreground border border-white/5 shadow-md z-50">
+                <p className="text-[9px] font-bold uppercase tracking-tight opacity-70">Previsão de Conclusão</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
