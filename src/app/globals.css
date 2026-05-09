@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -42,7 +43,7 @@
 }
 
 .gantt-grid {
-  background-size: 40px 100%;
+  background-size: 32px 100%;
   background-image: linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px);
 }
 

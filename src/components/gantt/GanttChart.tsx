@@ -19,7 +19,7 @@ interface GanttChartProps {
   onMoveTask?: (id: string, direction: 'up' | 'down') => void;
 }
 
-const DAY_WIDTH = 40;
+const DAY_WIDTH = 32;
 
 /**
  * Parses YYYY-MM-DD string into a local Date object to avoid timezone shifts.
@@ -146,7 +146,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
         <div className="inline-flex flex-col min-w-full min-h-full">
           {/* Unified Sticky Header */}
           <div className="flex sticky top-0 z-30 border-b bg-card/95 backdrop-blur-md">
-            <div className="w-28 sm:w-64 flex-shrink-0 border-r p-4 sm:p-6 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
+            <div className="w-40 sm:w-64 flex-shrink-0 border-r p-4 sm:p-6 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
               Estrutura
             </div>
             
@@ -172,8 +172,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                       {format(date, 'EEE')}
                     </span>
                     <span className={cn(
-                      "text-xs sm:text-sm font-black",
-                      isTodayDate && "text-primary bg-primary/10 rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center mx-auto"
+                      "text-[10px] sm:text-sm font-black",
+                      isTodayDate && "text-primary bg-primary/10 rounded-full w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center mx-auto"
                     )}>
                       {format(date, 'd')}
                     </span>
@@ -188,7 +188,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
             {chartData.map((task, index) => (
               <div key={task.id} className="flex h-14 sm:h-16 hover:bg-primary/5 transition-colors group">
                 {/* Task Label Sidebar - Sticky */}
-                <div className="w-28 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center gap-1 sm:gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-sm">
+                <div className="w-40 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center gap-1 sm:gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-sm">
                   <div className="flex flex-col opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
                      <Button 
                        variant="ghost" 
@@ -217,18 +217,17 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   </div>
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
-                     <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">
+                     <span className="truncate text-[10px] sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">
                         {task.name}
                      </span>
                      <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
-                        {/* Assignees Badges - Compact in sidebar */}
                         {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
                           <div className="flex items-center gap-1 overflow-hidden">
                             {task.assigneeEmails.map((email) => (
                               <Badge 
                                 key={email} 
                                 variant="secondary" 
-                                className="text-[7px] font-bold px-1.5 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
+                                className="text-[7px] font-bold px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
                               >
                                 {getFriendlyName(email)}
                               </Badge>
