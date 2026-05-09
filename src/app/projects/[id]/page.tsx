@@ -217,7 +217,7 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Stats Grid - Revised for better fit and responsiveness */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
@@ -225,12 +225,12 @@ export default function ProjectPage() {
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-2xl p-3 sm:p-4 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg overflow-hidden h-full">
+            <div key={i} className="bg-card/50 border rounded-2xl p-3 sm:p-4 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg h-auto min-h-[80px]">
               <div className={cn("p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
                 <stat.icon className={cn("w-5 h-5 sm:w-7 sm:h-7", stat.color)} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-0.5">
+                <p className="text-[10px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1 whitespace-normal">
                   {stat.label}
                 </p>
                 <p className="text-lg sm:text-2xl font-black leading-tight">
@@ -318,7 +318,7 @@ export default function ProjectPage() {
                             {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {task.assigneeEmails.map(email => (
-                                  <Badge key={email} variant="secondary" className="text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-muted-foreground/10 border-none">
+                                  <Badge key={email} variant="secondary" className="text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-primary/20 text-primary border-none shadow-sm">
                                     {getFriendlyName(email)}
                                   </Badge>
                                 ))}
