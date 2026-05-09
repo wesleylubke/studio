@@ -315,7 +315,7 @@ export default function ProjectPage() {
                     <thead className="bg-muted/40 border-b text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <tr>
                         <th className="px-2 sm:px-4 py-3 sm:py-5 w-[60px] sm:w-[100px] text-center">Ordem</th>
-                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-auto">Tarefa</th>
+                        <th className="px-2 sm:px-4 py-3 sm:py-5 w-[150px] sm:w-[300px]">Tarefa</th>
                         <th className="px-2 sm:px-4 py-3 sm:py-5 w-[120px] sm:w-[180px]">Equipe</th>
                         <th className="px-2 sm:px-4 py-3 sm:py-5 w-[110px] sm:w-[150px]">Timeline</th>
                         <th className="px-2 sm:px-4 py-3 sm:py-5 w-[80px] sm:w-[120px]">Status</th>
