@@ -98,7 +98,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <TooltipTrigger asChild>
                 <Badge 
                   className={cn(
-                    "border-none px-2 py-0.5 text-[10px] font-black cursor-help",
+                    "border-none px-2 py-0.5 text-[10px] font-black",
                     stats.avgProgress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
                   )}
                   onClick={(e) => e.stopPropagation()}
