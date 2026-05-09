@@ -68,10 +68,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     if (!email) return 'Usuário';
     if (user && email === user.email && user.displayName) return user.displayName;
     
-    return email.split('@')[0]
-      .split(/[._-]/)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+    const parts = email.split('@')[0].split(/[._-]/);
+    if (parts.length >= 2) {
+      return parts.slice(0, 2).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+    }
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
   };
 
   const statusMap: Record<ProjectStatus, { label: string; color: string }> = {
@@ -92,12 +93,24 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <CardTitle className="text-xl font-bold truncate">
             {project.name}
           </CardTitle>
-          <Badge className={cn(
-            "border-none px-2 py-0.5 text-[10px] font-black",
-            stats.avgProgress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
-          )}>
-            {stats.avgProgress}%
-          </Badge>
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Badge 
+                  className={cn(
+                    "border-none px-2 py-0.5 text-[10px] font-black cursor-help",
+                    stats.avgProgress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {stats.avgProgress}%
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="px-2 py-1 bg-popover text-popover-foreground border border-white/5 shadow-md z-50">
+                <p className="text-[9px] font-bold uppercase tracking-tight opacity-70">Progresso Médio</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
         <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10 mb-6 opacity-80">
