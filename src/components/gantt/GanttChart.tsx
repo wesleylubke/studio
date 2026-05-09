@@ -219,31 +219,26 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   <div className="flex-grow flex flex-col truncate min-w-0">
                      <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">{task.name}</span>
                      <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
-                        <div className="flex-grow h-0.5 sm:h-1 bg-muted rounded-full overflow-hidden max-w-[20px] sm:max-w-[40px] shrink-0">
-                           <div className="h-full bg-primary" style={{ width: `${task.progress}%` }} />
-                        </div>
-                        <span className="text-[8px] text-muted-foreground font-black shrink-0 mr-1">
-                          {task.progress}%
-                        </span>
-                        
                         {/* Assignees Badges - Compact in sidebar */}
-                        {task.assigneeEmails && task.assigneeEmails.length > 0 && (
-                          <div className="hidden sm:flex items-center gap-1 ml-auto overflow-hidden">
+                        {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
+                          <div className="flex items-center gap-1 overflow-hidden">
                             {task.assigneeEmails.slice(0, 1).map((email) => (
                               <Badge 
                                 key={email} 
                                 variant="secondary" 
-                                className="text-[7px] font-bold px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
+                                className="text-[7px] font-bold px-1.5 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
                               >
-                                {getFriendlyName(email).split(' ')[0]}
+                                {getFriendlyName(email)}
                               </Badge>
                             ))}
                             {task.assigneeEmails.length > 1 && (
-                              <Badge variant="outline" className="text-[7px] font-bold px-1 py-0 border-primary/20 text-primary/70 shrink-0">
+                              <Badge variant="outline" className="text-[7px] font-bold px-1.5 py-0 border-primary/20 text-primary/70 shrink-0">
                                 +{task.assigneeEmails.length - 1}
                               </Badge>
                             )}
                           </div>
+                        ) : (
+                          <span className="text-[8px] text-muted-foreground/50 italic">Sem equipe</span>
                         )}
                      </div>
                   </div>
