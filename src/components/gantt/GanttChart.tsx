@@ -129,10 +129,11 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
     if (!email) return 'Usuário';
     if (user && email === user.email && user.displayName) return user.displayName;
     
-    return email.split('@')[0]
-      .split(/[._-]/)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+    const parts = email.split('@')[0].split(/[._-]/);
+    if (parts.length >= 2) {
+      return parts.slice(0, 2).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+    }
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
   };
 
   return (
@@ -224,12 +225,32 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   <div className="flex-grow flex flex-col truncate min-w-0">
                      <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors">{task.name}</span>
                      <div className="flex items-center gap-1 sm:gap-2">
-                        <div className="flex-grow h-0.5 sm:h-1 bg-muted rounded-full overflow-hidden max-w-[30px] sm:max-w-[60px]">
+                        <div className="flex-grow h-0.5 sm:h-1 bg-muted rounded-full overflow-hidden max-w-[20px] sm:max-w-[40px]">
                            <div className="h-full bg-primary" style={{ width: `${task.progress}%` }} />
                         </div>
-                        <span className="text-[8px] text-muted-foreground font-black">
+                        <span className="text-[8px] text-muted-foreground font-black shrink-0">
                           {task.progress}%
                         </span>
+                        
+                        {/* Assignees initials - Tiny avatars in sidebar */}
+                        {task.assigneeEmails && task.assigneeEmails.length > 0 && (
+                          <div className="flex -space-x-1.5 ml-auto">
+                            {task.assigneeEmails.slice(0, 2).map((email) => (
+                              <div 
+                                key={email} 
+                                className="w-4 h-4 rounded-full bg-primary/20 border border-card flex items-center justify-center text-[7px] font-black text-primary shrink-0"
+                                title={getFriendlyName(email)}
+                              >
+                                {getFriendlyName(email).charAt(0)}
+                              </div>
+                            ))}
+                            {task.assigneeEmails.length > 2 && (
+                              <div className="w-4 h-4 rounded-full bg-muted border border-card flex items-center justify-center text-[7px] font-black text-muted-foreground shrink-0">
+                                +{task.assigneeEmails.length - 2}
+                              </div>
+                            )}
+                          </div>
+                        )}
                      </div>
                   </div>
                   
