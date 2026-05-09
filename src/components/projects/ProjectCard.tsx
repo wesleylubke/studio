@@ -161,10 +161,19 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             </Tooltip>
           </TooltipProvider>
 
-          <Badge variant="outline" className="gap-1.5 py-1 px-3 border-muted-foreground/20 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-            <Calendar className="w-3 h-3" />
-            {stats.endDate ? format(stats.endDate, 'dd/MM/yy') : 'TBD'}
-          </Badge>
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="gap-1.5 py-1 px-3 border-muted-foreground/20 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
+                  <Calendar className="w-3 h-3" />
+                  {stats.endDate ? format(stats.endDate, 'dd/MM/yy') : 'TBD'}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="px-3 py-1.5 bg-card/95 backdrop-blur-md border-2 rounded-xl shadow-2xl z-50">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Previsão de Conclusão</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </CardHeader>
     </Card>
