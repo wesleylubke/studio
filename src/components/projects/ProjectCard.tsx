@@ -54,7 +54,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-muted/50 overflow-hidden group bg-card/40 backdrop-blur-sm"
+      className="cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-muted/50 overflow-hidden group bg-card/40 backdrop-blur-sm hover:bg-white/5 hover:border-primary/20"
       onClick={handleCardClick}
     >
       <CardHeader className="pb-6">
