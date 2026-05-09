@@ -166,46 +166,48 @@ export default function Home() {
         </div>
 
         <Tabs defaultValue="ongoing" className="w-full mb-8 sm:mb-12" onValueChange={(val) => setActiveTab(val as ProjectStatus)}>
-          <TabsList className="grid grid-cols-3 gap-2 sm:gap-6 bg-transparent h-auto p-0 border-none w-full mb-8 sm:mb-12">
-            <TabsTrigger 
-              value="ongoing" 
-              className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left data-[state=active]:bg-primary/10 data-[state=active]:border-primary data-[state=active]:text-foreground transition-all duration-300 group"
-            >
-              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-primary/10 group-data-[state=active]:bg-primary/20 transition-colors")}>
-                <Clock className={cn("w-4 h-4 sm:w-7 sm:h-7 text-primary")} />
-              </div>
-              <div>
-                <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">Andamento</p>
-                <p className="text-xs sm:text-3xl font-black leading-tight">{counts.ongoing}</p>
-              </div>
-            </TabsTrigger>
+          <div className="flex justify-center mb-8 sm:mb-12">
+            <TabsList className="grid grid-cols-3 bg-card/40 border-2 rounded-2xl sm:rounded-3xl p-1.5 h-auto w-full max-w-4xl backdrop-blur-md shadow-2xl">
+              <TabsTrigger 
+                value="ongoing" 
+                className="rounded-xl sm:rounded-2xl py-3 sm:py-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl group"
+              >
+                <div className="p-2 sm:p-3 rounded-xl bg-primary/10 group-data-[state=active]:bg-white/20 transition-colors">
+                  <Clock className="w-4 h-4 sm:w-6 sm:h-6" />
+                </div>
+                <div className="flex flex-col items-center sm:items-start">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest font-black opacity-70">Andamento</span>
+                  <span className="text-sm sm:text-2xl font-black leading-tight">{counts.ongoing}</span>
+                </div>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="paused" 
-              className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left data-[state=active]:bg-muted/50 data-[state=active]:border-muted-foreground/30 data-[state=active]:text-foreground transition-all duration-300 group"
-            >
-              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-muted group-data-[state=active]:bg-muted/80 transition-colors")}>
-                <PauseCircle className={cn("w-4 h-4 sm:w-7 sm:h-7 text-muted-foreground")} />
-              </div>
-              <div>
-                <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">Pausados</p>
-                <p className="text-xs sm:text-3xl font-black leading-tight">{counts.paused}</p>
-              </div>
-            </TabsTrigger>
+              <TabsTrigger 
+                value="paused" 
+                className="rounded-xl sm:rounded-2xl py-3 sm:py-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 transition-all duration-300 data-[state=active]:bg-muted-foreground data-[state=active]:text-background data-[state=active]:shadow-xl group"
+              >
+                <div className="p-2 sm:p-3 rounded-xl bg-muted group-data-[state=active]:bg-white/20 transition-colors">
+                  <PauseCircle className="w-4 h-4 sm:w-6 sm:h-6" />
+                </div>
+                <div className="flex flex-col items-center sm:items-start">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest font-black opacity-70">Pausados</span>
+                  <span className="text-sm sm:text-2xl font-black leading-tight">{counts.paused}</span>
+                </div>
+              </TabsTrigger>
 
-            <TabsTrigger 
-              value="finished" 
-              className="bg-card/50 border rounded-xl sm:rounded-2xl p-2 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left data-[state=active]:bg-accent/10 data-[state=active]:border-accent data-[state=active]:text-foreground transition-all duration-300 group"
-            >
-              <div className={cn("p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-accent/10 group-data-[state=active]:bg-accent/20 transition-colors")}>
-                <CheckCircle2 className={cn("w-4 h-4 sm:w-7 sm:h-7 text-accent")} />
-              </div>
-              <div>
-                <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">Finalizados</p>
-                <p className="text-xs sm:text-3xl font-black leading-tight">{counts.finished}</p>
-              </div>
-            </TabsTrigger>
-          </TabsList>
+              <TabsTrigger 
+                value="finished" 
+                className="rounded-xl sm:rounded-2xl py-3 sm:py-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 transition-all duration-300 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-xl group"
+              >
+                <div className="p-2 sm:p-3 rounded-xl bg-accent/10 group-data-[state=active]:bg-white/20 transition-colors">
+                  <CheckCircle2 className="w-4 h-4 sm:w-6 sm:h-6" />
+                </div>
+                <div className="flex flex-col items-center sm:items-start">
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest font-black opacity-70">Finalizados</span>
+                  <span className="text-sm sm:text-2xl font-black leading-tight">{counts.finished}</span>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value={activeTab} className="focus-visible:ring-0">
             {filteredProjects.length > 0 ? (
