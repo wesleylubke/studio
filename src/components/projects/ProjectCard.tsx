@@ -59,7 +59,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     >
       <CardHeader className="pb-6">
         <div className="flex justify-between items-start gap-4 mb-3">
-          <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors truncate">
+          <CardTitle className="text-xl font-bold truncate">
             {project.name}
           </CardTitle>
         </div>
