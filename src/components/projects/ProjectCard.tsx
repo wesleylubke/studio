@@ -119,19 +119,28 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         
         <div className="flex flex-wrap items-center gap-3">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={cn(
-                  "h-7 px-3 rounded-full border-none gap-1.5 text-[9px] font-black uppercase tracking-widest transition-all hover:scale-105",
-                  statusMap[currentStatus].color
-                )}
-              >
-                {statusMap[currentStatus].label}
-                <ChevronDown className="w-3 h-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={cn(
+                        "h-7 px-3 rounded-full border-none gap-1.5 text-[9px] font-black uppercase tracking-widest transition-all hover:scale-105",
+                        statusMap[currentStatus].color
+                      )}
+                    >
+                      {statusMap[currentStatus].label}
+                      <ChevronDown className="w-3 h-3 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="px-2 py-1 bg-popover text-popover-foreground border border-white/5 shadow-md z-50">
+                  <p className="text-[9px] font-bold uppercase tracking-tight opacity-70">Status do Projeto</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DropdownMenuContent align="start" className="rounded-xl p-1 min-w-[150px] z-50" onClick={(e) => e.stopPropagation()}>
               {(Object.keys(statusMap) as ProjectStatus[]).map((statusKey) => (
                 <DropdownMenuItem 
