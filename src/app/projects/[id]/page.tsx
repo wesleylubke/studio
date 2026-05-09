@@ -138,13 +138,13 @@ export default function ProjectPage() {
 
   const getFriendlyName = (email: string) => {
     if (!email) return 'Usuário';
-    // Se o e-mail for do usuário logado e ele tiver displayName, usa ele
     if (user && email === user.email && user.displayName) return user.displayName;
     
-    return email.split('@')[0]
-      .split(/[._-]/)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+    const parts = email.split('@')[0].split(/[._-]/);
+    if (parts.length >= 2) {
+      return parts.slice(0, 2).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+    }
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
   };
 
   const handleDeleteProject = (projectId: string) => {
@@ -217,21 +217,21 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-6">
+        {/* Stats Grid - Adjusted for better responsiveness and visibility */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
             { label: 'Concluídas', value: stats.completed, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-xl sm:rounded-2xl p-1.5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-5 backdrop-blur-sm shadow-lg text-center sm:text-left">
-              <div className={cn("p-1 sm:p-4 rounded-lg sm:rounded-2xl", stat.bg)}>
-                <stat.icon className={cn("w-3.5 h-3.5 sm:w-7 sm:h-7", stat.color)} />
+            <div key={i} className="bg-card/50 border rounded-2xl p-4 sm:p-6 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg">
+              <div className={cn("p-3 sm:p-4 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
+                <stat.icon className={cn("w-5 h-5 sm:w-7 sm:h-7", stat.color)} />
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[6px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">{stat.label}</p>
-                <p className="text-[10px] sm:text-3xl font-black leading-tight truncate">{stat.value}</p>
+              <div className="min-w-0">
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1">{stat.label}</p>
+                <p className="text-lg sm:text-3xl font-black leading-tight truncate">{stat.value}</p>
               </div>
             </div>
           ))}
