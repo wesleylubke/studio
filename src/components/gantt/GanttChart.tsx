@@ -218,13 +218,13 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
                      <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-1">
-                        {task.name} <span className="text-primary/70 font-medium">({task.progress}%)</span>
+                        {task.name}
                      </span>
                      <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
                         {/* Assignees Badges - Compact in sidebar */}
                         {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
                           <div className="flex items-center gap-1 overflow-hidden">
-                            {task.assigneeEmails.slice(0, 1).map((email) => (
+                            {task.assigneeEmails.map((email) => (
                               <Badge 
                                 key={email} 
                                 variant="secondary" 
@@ -233,11 +233,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                                 {getFriendlyName(email)}
                               </Badge>
                             ))}
-                            {task.assigneeEmails.length > 1 && (
-                              <Badge variant="outline" className="text-[7px] font-bold px-1.5 py-0 border-primary/20 text-primary/70 shrink-0">
-                                +{task.assigneeEmails.length - 1}
-                              </Badge>
-                            )}
                           </div>
                         ) : (
                           <span className="text-[8px] text-muted-foreground/50 italic">Sem equipe</span>
