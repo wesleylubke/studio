@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Clock, ChevronDown, Check } from 'lucide-react';
-import { format } from 'date-fns';
+import { Users, ChevronDown, Check, Target, Calendar } from 'lucide-react';
+import { format, max as maxDateFns } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -11,20 +12,45 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useFirestore, updateDocumentNonBlocking } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, updateDocumentNonBlocking, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
-import { ProjectStatus } from '@/types';
+import { ProjectStatus, Task } from '@/types';
 
 interface ProjectCardProps {
   project: any;
 }
+
+/**
+ * Parses YYYY-MM-DD string into a local Date object to avoid timezone shifts.
+ */
+const parseLocalDate = (dateStr: string) => {
+  if (!dateStr) return new Date();
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter();
   const db = useFirestore();
   const members = project.members || [];
   const memberCount = members.length;
+
+  // Fetch tasks to calculate progress and predicted end date
+  const tasksQuery = useMemoFirebase(() => {
+    if (!db || !project.id) return null;
+    return collection(db, 'projects', project.id, 'tasks');
+  }, [db, project.id]);
+
+  const { data: tasks } = useCollection<Task>(tasksQuery);
+
+  const stats = useMemo(() => {
+    if (!tasks || tasks.length === 0) return { avgProgress: 0, endDate: null };
+    const avgProgress = Math.round(tasks.reduce((acc, t) => acc + (t.progress || 0), 0) / tasks.length);
+    const endDates = tasks.map(t => parseLocalDate(t.endDate));
+    const latestEndDate = maxDateFns(endDates);
+    return { avgProgress, endDate: latestEndDate };
+  }, [tasks]);
 
   const handleCardClick = () => {
     router.push(`/projects/${project.id}`);
@@ -54,7 +80,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-muted/50 overflow-hidden group bg-card/40 backdrop-blur-sm hover:bg-white/5 hover:border-primary/20"
+      className="cursor-pointer hover:shadow-2xl hover:bg-white/5 hover:border-primary/20 transition-all duration-300 border-muted/50 overflow-hidden group bg-card/40 backdrop-blur-sm"
       onClick={handleCardClick}
     >
       <CardHeader className="pb-6">
@@ -62,6 +88,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <CardTitle className="text-xl font-bold truncate">
             {project.name}
           </CardTitle>
+          <Badge className={cn(
+            "border-none px-2 py-0.5 text-[10px] font-black",
+            stats.avgProgress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
+          )}>
+            {stats.avgProgress}%
+          </Badge>
         </div>
         
         <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10 mb-6 opacity-80">
@@ -110,7 +142,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Users className="w-3 h-3" />
-                  {memberCount} {memberCount === 1 ? 'Membro' : 'Membros'}
+                  {memberCount}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="p-3 bg-card/95 backdrop-blur-md border-2 rounded-xl shadow-2xl z-50 min-w-[200px]">
@@ -130,8 +162,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </TooltipProvider>
 
           <Badge variant="outline" className="gap-1.5 py-1 px-3 border-muted-foreground/20 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-            <Clock className="w-3 h-3" />
-            {project.createdAt ? format(new Date(project.createdAt), 'dd/MM/yy') : 'Recente'}
+            <Calendar className="w-3 h-3" />
+            {stats.endDate ? format(stats.endDate, 'dd/MM/yy') : 'TBD'}
           </Badge>
         </div>
       </CardHeader>
