@@ -230,7 +230,7 @@ export default function ProjectPage() {
                 <stat.icon className={cn("w-3.5 h-3.5 sm:w-7 sm:h-7", stat.color)} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[6px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight truncate">{stat.label}</p>
+                <p className="text-[6px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight">{stat.label}</p>
                 <p className="text-[10px] sm:text-3xl font-black leading-tight truncate">{stat.value}</p>
               </div>
             </div>
