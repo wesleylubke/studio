@@ -117,7 +117,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           {project.description || "Sem descrição definida para este projeto."}
         </CardDescription>
         
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
           <DropdownMenu>
             <TooltipProvider>
               <Tooltip delayDuration={300}>
