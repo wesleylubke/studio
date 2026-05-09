@@ -272,7 +272,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                           />
                           <div className="absolute inset-0 flex items-center px-2 sm:px-4 pointer-events-none">
                              <span className="text-[9px] sm:text-[10px] font-black text-white truncate drop-shadow-md">
-                                {task.name}
+                                {task.name} ({task.progress}%)
                              </span>
                           </div>
                         </div>
