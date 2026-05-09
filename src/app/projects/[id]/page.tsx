@@ -225,12 +225,12 @@ export default function ProjectPage() {
             { label: 'Pendentes', value: (projectTasks?.length || 0) - stats.completed, icon: Clock, color: 'text-primary', bg: 'bg-primary/5' },
             { label: 'Progresso', value: `${stats.avgProgress}%`, icon: Target, color: 'text-muted-foreground', bg: 'bg-muted' }
           ].map((stat, i) => (
-            <div key={i} className="bg-card/50 border rounded-2xl p-4 sm:p-6 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg overflow-hidden h-full">
-              <div className={cn("p-3 sm:p-4 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
+            <div key={i} className="bg-card/50 border rounded-2xl p-3 sm:p-4 flex items-center gap-4 sm:gap-5 backdrop-blur-sm shadow-lg overflow-hidden h-full">
+              <div className={cn("p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
                 <stat.icon className={cn("w-5 h-5 sm:w-7 sm:h-7", stat.color)} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-1">
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black leading-tight mb-0.5">
                   {stat.label}
                 </p>
                 <p className="text-lg sm:text-2xl font-black leading-tight">
