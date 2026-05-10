@@ -34,7 +34,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   
-  // Mouse drag-to-scroll state
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -51,12 +50,10 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
       };
     }
 
-    // Process tasks with consistent local parsing
     const taskDates = tasks.flatMap(t => [parseLocalDate(t.startDate), parseLocalDate(t.endDate)]);
     const minDate = min([...taskDates, today]);
     const maxDate = max([...taskDates, today]);
 
-    // Extend range slightly for padding
     const startDate = startOfDay(addDays(minDate, -7));
     const endDate = startOfDay(addDays(maxDate, 14));
     
@@ -68,7 +65,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
       const taskEnd = startOfDay(parseLocalDate(task.endDate));
       
       const startOffset = differenceInDays(taskStart, startDate) * DAY_WIDTH;
-      // Duration includes the end day, so we add 1
       const duration = (differenceInDays(taskEnd, taskStart) + 1) * DAY_WIDTH;
 
       return {
@@ -83,7 +79,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
 
   useEffect(() => {
     if (scrollContainerRef.current && todayOffset > 0) {
-      // Small delay to ensure container is fully rendered
       setTimeout(() => {
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollLeft = Math.max(0, todayOffset - 200);
@@ -94,8 +89,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
-    
-    // Don't start drag if clicking interactive elements
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('.dropdown-trigger')) return;
 
     setIsDragging(true);
@@ -103,13 +96,8 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
     setScrollLeft(scrollContainerRef.current.scrollLeft);
   };
 
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => setIsDragging(false);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !scrollContainerRef.current) return;
@@ -144,7 +132,6 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
         onMouseMove={handleMouseMove}
       >
         <div className="inline-flex flex-col min-w-full min-h-full">
-          {/* Unified Sticky Header */}
           <div className="flex sticky top-0 z-30 border-b bg-card/95 backdrop-blur-md">
             <div className="w-40 sm:w-64 flex-shrink-0 border-r p-3 sm:p-6 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground sticky left-0 z-40 bg-card/95 backdrop-blur-md">
               Estrutura
@@ -166,13 +153,13 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                     style={{ width: DAY_WIDTH }}
                   >
                     <span className={cn(
-                      "text-[7px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1",
+                      "text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1",
                       isTodayDate && "text-primary"
                     )}>
                       {format(date, 'EEE')}
                     </span>
                     <span className={cn(
-                      "text-[9px] sm:text-sm font-black",
+                      "text-[9px] sm:text-[11px] font-black",
                       isTodayDate && "text-primary bg-primary/10 rounded-full w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center mx-auto"
                     )}>
                       {format(date, 'd')}
@@ -183,11 +170,9 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
             </div>
           </div>
 
-          {/* Grid Content */}
           <div className="flex flex-col divide-y divide-white/5 bg-card/50">
             {chartData.map((task, index) => (
               <div key={task.id} className="flex h-12 sm:h-16 hover:bg-primary/5 transition-colors group">
-                {/* Task Label Sidebar - Sticky */}
                 <div className="w-40 sm:w-64 flex-shrink-0 border-r px-2 sm:px-4 flex items-center gap-1 sm:gap-3 sticky left-0 z-10 bg-card/95 backdrop-blur-md shadow-sm">
                   <div className="flex flex-col opacity-60 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity shrink-0">
                      <Button 
@@ -217,7 +202,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                   </div>
 
                   <div className="flex-grow flex flex-col truncate min-w-0">
-                     <span className="truncate text-[10px] sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-0.5 sm:mb-1">
+                     <span className="truncate text-xs sm:text-sm font-bold group-hover:text-primary transition-colors leading-tight mb-0.5 sm:mb-1">
                         {task.name}
                      </span>
                      <div className="flex items-center gap-1 overflow-hidden">
@@ -227,20 +212,19 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                               <Badge 
                                 key={email} 
                                 variant="secondary" 
-                                className="text-[6px] sm:text-[7px] font-bold px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
+                                className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-1 py-0 bg-primary/20 text-primary border-none whitespace-nowrap shadow-sm"
                               >
                                 {getFriendlyName(email)}
                               </Badge>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-[7px] text-muted-foreground/50 italic">Vago</span>
+                          <span className="text-[8px] sm:text-[10px] text-muted-foreground/50 italic font-bold">Vago</span>
                         )}
                      </div>
                   </div>
                 </div>
 
-                {/* Bars Area */}
                 <div className="relative gantt-grid" style={{ width: dateRange.length * DAY_WIDTH }}>
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
@@ -265,7 +249,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                             style={{ width: `${task.progress}%` }}
                           />
                           <div className="absolute inset-0 flex items-center px-1 sm:px-4 pointer-events-none">
-                             <span className="text-[8px] sm:text-[10px] font-black text-white truncate drop-shadow-md">
+                             <span className="text-[9px] sm:text-[11px] font-black text-white truncate drop-shadow-md">
                                 {task.name} ({task.progress}%)
                              </span>
                           </div>
@@ -275,16 +259,16 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                         <div className="space-y-2 sm:space-y-3">
                           <div className="flex items-center justify-between gap-2 sm:gap-4">
                             <h4 className="font-black text-xs sm:text-sm text-primary uppercase tracking-tight truncate">{task.name}</h4>
-                            <Badge className={cn("border-none px-1.5 py-0 font-black text-[8px] sm:text-[9px]", task.progress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary")}>
+                            <Badge className={cn("border-none px-1.5 py-0 font-black text-[9px] sm:text-[10px]", task.progress === 100 ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary")}>
                               {task.progress}%
                             </Badge>
                           </div>
                           
                           {task.description && (
-                            <p className="text-[9px] sm:text-[10px] text-muted-foreground leading-relaxed bg-muted/30 p-1.5 sm:p-2 rounded-lg line-clamp-2">{task.description}</p>
+                            <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-relaxed bg-muted/30 p-1.5 sm:p-2 rounded-lg line-clamp-2">{task.description}</p>
                           )}
 
-                          <div className="flex items-center gap-1.5 sm:gap-2 text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                             <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
                             <span>{format(parseLocalDate(task.startDate), 'dd MMM')} — {format(parseLocalDate(task.endDate), 'dd MMM')}</span>
                           </div>
@@ -293,7 +277,7 @@ export default function GanttChart({ tasks, onTaskEdit, onTaskDelete, onMoveTask
                             <div className="pt-2 border-t border-white/5">
                                <div className="flex flex-wrap gap-1">
                                  {task.assigneeEmails.map(email => (
-                                   <Badge key={email} variant="secondary" className="text-[7px] sm:text-[8px] px-1 py-0 bg-primary/10 text-primary border-none font-bold">
+                                   <Badge key={email} variant="secondary" className="text-[8px] sm:text-[9px] px-1 py-0 bg-primary/10 text-primary border-none font-black uppercase tracking-wider">
                                      {getFriendlyName(email)}
                                    </Badge>
                                  ))}

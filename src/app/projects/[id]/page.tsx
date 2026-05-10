@@ -69,7 +69,6 @@ export default function ProjectPage() {
 
   const handleTableMouseDown = (e: React.MouseEvent) => {
     if (!tableContainerRef.current) return;
-    // Don't start drag if clicking interactive elements
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('.dropdown-trigger')) return;
 
     setIsTableDragging(true);
@@ -209,7 +208,6 @@ export default function ProjectPage() {
       <Navbar />
       
       <main className="flex-grow p-3 sm:p-8 flex flex-col space-y-6 sm:space-y-8 max-w-[1600px] mx-auto w-full">
-        {/* Header Section */}
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6">
           <div className="space-y-2 sm:space-y-3 w-full">
             <div className="flex items-center gap-2 text-muted-foreground text-[10px] font-bold uppercase tracking-widest overflow-x-auto whitespace-nowrap pb-1">
@@ -221,7 +219,7 @@ export default function ProjectPage() {
               <h1 className="text-xl sm:text-5xl font-black tracking-tighter break-words">
                 {project.name}
               </h1>
-              <Badge className="bg-primary/20 text-primary border-none px-2 sm:px-3 py-0.5 text-[9px] sm:text-sm font-black whitespace-nowrap">
+              <Badge className="bg-primary/20 text-primary border-none px-2 sm:px-3 py-0.5 text-[10px] sm:text-sm font-black whitespace-nowrap">
                 {stats.avgProgress}% CONCLUÍDO
               </Badge>
             </div>
@@ -244,7 +242,6 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Stats Grid - Permanent single line with icons */}
         <div className="flex flex-row gap-2 sm:gap-6 w-full">
           {[
             { label: 'Total', value: projectTasks?.length || 0, icon: LayoutList, color: 'text-primary', bg: 'bg-primary/10' },
@@ -268,7 +265,6 @@ export default function ProjectPage() {
           ))}
         </div>
 
-        {/* Main Content (Tabs) */}
         <div className="flex-grow flex flex-col min-h-[500px]">
           <Tabs defaultValue="gantt" className="w-full flex-grow flex flex-col">
             <div className="flex justify-center sm:justify-between items-center mb-4 sm:mb-6">
@@ -312,7 +308,7 @@ export default function ProjectPage() {
                   )}
                 >
                   <table className="w-full text-left min-w-[700px] table-fixed">
-                    <thead className="bg-muted/40 border-b text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                    <thead className="bg-muted/40 border-b text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <tr className="h-14 sm:h-20">
                         <th className="px-2 sm:px-4 w-[60px] sm:w-[80px] text-center">Ordem</th>
                         <th className="px-2 sm:px-4 w-[160px] sm:w-[256px]">Tarefa</th>
@@ -348,24 +344,24 @@ export default function ProjectPage() {
                             </div>
                           </td>
                           <td className="px-2 sm:px-4">
-                            <p className="font-bold text-xs sm:text-base group-hover:text-primary transition-colors truncate">{task.name}</p>
-                            <p className="text-[9px] sm:text-xs text-muted-foreground truncate opacity-70">{task.description}</p>
+                            <p className="font-bold text-xs sm:text-sm group-hover:text-primary transition-colors truncate">{task.name}</p>
+                            <p className="text-[9px] sm:text-[11px] text-muted-foreground truncate opacity-70">{task.description}</p>
                           </td>
                           <td className="px-2 sm:px-4">
                             {task.assigneeEmails && task.assigneeEmails.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {task.assigneeEmails.map(email => (
-                                  <Badge key={email} variant="secondary" className="text-[7px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 capitalize bg-primary/20 text-primary border-none shadow-sm whitespace-nowrap">
+                                  <Badge key={email} variant="secondary" className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 bg-primary/20 text-primary border-none shadow-sm whitespace-nowrap">
                                     {getFriendlyName(email)}
                                   </Badge>
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-[7px] sm:text-[10px] font-bold text-muted-foreground/30 italic">Vago</span>
+                              <span className="text-[8px] sm:text-[10px] font-bold text-muted-foreground/30 italic">Vago</span>
                             )}
                           </td>
                           <td className="px-2 sm:px-4">
-                            <div className="text-[9px] sm:text-xs font-bold whitespace-nowrap">
+                            <div className="text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
                               <span className="text-muted-foreground">{format(parseLocalDate(task.startDate), 'dd MMM')}</span>
                               <span className="mx-1 text-primary opacity-30">—</span>
                               <span className="text-muted-foreground">{format(parseLocalDate(task.endDate), 'dd MMM')}</span>
@@ -373,7 +369,7 @@ export default function ProjectPage() {
                           </td>
                           <td className="px-2 sm:px-4">
                             <div className="flex items-center gap-2">
-                              <span className="text-[9px] sm:text-xs font-black min-w-[30px] text-center">{task.progress}%</span>
+                              <span className="text-[9px] sm:text-[10px] font-black min-w-[30px] text-center">{task.progress}%</span>
                               <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden shadow-inner hidden sm:block">
                                 <div className={cn("h-full transition-all duration-500", task.progress === 100 ? "bg-accent" : "bg-primary")} style={{ width: `${task.progress}%` }} />
                               </div>
